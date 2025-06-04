@@ -1,11 +1,11 @@
 
-# Insider Threat Detection dengan GraphSAGE & GraphSVX
+# IMPLEMENTASI MODEL GRAPHSAGE DAN GRAPHSVX UNTUK DETEKSI DAN INTERPRETASI POLA ANCAMAN INTERNAL DALAM PROFIL PERILAKU PADA dataset CERT INSIDER THREATS R6.2
 
 ## Deskripsi  
-Proyek ini bertujuan mendeteksi ancaman dari dalam (insider threat) di lingkungan organisasi menggunakan Graph Neural Networks, khususnya GraphSAGE, dan menjelaskan prediksi model dengan GraphSVX.
+Penelitian ini bertujuan untuk menerapkan model GraphSAGE dalam menemukan pola tidak biasa pada dataset CERT Insider threats r6.2 dengan menggunakan representasi graf yang menunjukkan hubungan antara kegiatan pengguna. Penelitian ini juga akan menambahkan teknik GraphSVX untuk membantu menjelaskan faktor-faktor yang mempengaruhi hasil deteksi. Akhirnya, penelitian akan mempelajari pola perilaku pengguna yang dianggap tidak normal untuk memahami ciri-ciri ancaman internal dalam dataset yang digunakan.
 
 ## Fitur Utama  
-- Model heterogeneous graph dengan node user, PC, file, dan URL  
+- Model heterogeneous graph dengan node user, PC, dan URL  
 - Multi-layer GraphSAGE untuk klasifikasi binary  
 - Penanganan class imbalance (imbalan kelas)  
 - Evaluasi lengkap dengan AUC, Precision-Recall, dan threshold optimal  
