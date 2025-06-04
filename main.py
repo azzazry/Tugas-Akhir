@@ -2,10 +2,10 @@
 import os
 import traceback
 
-from train import train_insider_threat_model
-from evaluate import evaluate_insider_threat_model
-from explain import explain_insider_predictions
-from visualization import create_research_visualizations
+from src.train import train_insider_threat_model
+from src.evaluate import evaluate_insider_threat_model
+from src.explain import explain_insider_predictions
+from src.visualization import create_research_visualizations
 
 def create_directories():
     os.makedirs('result/visualizations', exist_ok=True)

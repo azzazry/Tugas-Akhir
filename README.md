@@ -44,10 +44,10 @@ python main.py
 - scikit-learn  
 - matplotlib & seaborn  
 
-## Referensi  
+## Referensi
 - [GraphSAGE Paper](https://cs.stanford.edu/people/jure/pubs/graphsage-nips17.pdf)  
 - [GraphSVX Paper](https://arxiv.org/pdf/2104.10482)  
 - [CERT Dataset](https://kilthub.cmu.edu/ndownloader/files/24844280)
 
 ## Author  
-Tugas Akhir oleh [Azzazry](https://github.com/azzazry)
+Tugas Akhir oleh [Aaz Zazri Nugraha](https://github.com/azzazry)
