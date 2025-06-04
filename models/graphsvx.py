@@ -1,8 +1,6 @@
 import torch
 import numpy as np
-from itertools import combinations
 from sklearn.linear_model import LinearRegression
-from sklearn.metrics import r2_score
 import torch.nn.functional as F
 from torch_geometric.utils import k_hop_subgraph
 import warnings

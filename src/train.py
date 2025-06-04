@@ -9,7 +9,7 @@ from models.graphsage import InsiderThreatGraphSAGE
 
 def train_insider_threat_model():
     # Load preprocessed graph data
-    with open('data/preprocessing_objects.pkl', 'rb') as f:
+    with open('data/data_objects.pkl', 'rb') as f:
         data = pickle.load(f)
 
     # Inisialisasi model dan optimizer
