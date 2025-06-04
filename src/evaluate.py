@@ -3,13 +3,12 @@
 import torch
 import pickle
 import numpy as np
-import matplotlib.pyplot as plt
 from sklearn.metrics import (
     roc_auc_score,
     precision_recall_curve,
     average_precision_score
 )
-from models.graphsage_model import InsiderThreatGraphSAGE
+from models.graphsage import InsiderThreatGraphSAGE
 
 def evaluate_insider_threat_model():
     # Load trained model checkpoint

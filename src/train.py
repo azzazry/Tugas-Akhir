@@ -5,7 +5,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import pickle
 from sklearn.metrics import roc_auc_score
-from models.graphsage_model import InsiderThreatGraphSAGE  # pastikan path ini sesuai struktur project
+from models.graphsage import InsiderThreatGraphSAGE
 
 def train_insider_threat_model():
     # Load preprocessed graph data

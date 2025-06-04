@@ -3,8 +3,8 @@
 import torch
 import pickle
 import numpy as np
-from models.explainability import GraphSVX  # Menggunakan model explainability yang telah dibuat
-from models.graphsage_model import InsiderThreatGraphSAGE  # pastikan path ini sesuai struktur proyek
+from models.graphsvx import GraphSVX 
+from models.graphsage import InsiderThreatGraphSAGE 
 
 def explain_insider_predictions():
     # Load trained model checkpoint
