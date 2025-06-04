@@ -1,0 +1,23 @@
+# Data manipulation and analysis
+pandas
+numpy
+
+# Option big data manipulation
+dask
+pyarrow
+
+# Machine learning
+torch
+torch-geometric
+torchvision
+tensorboardx
+scikit-learn
+imbalanced-learn
+networkx
+
+# Data visualization
+matplotlib
+seaborn
+
+# Jupyter notebook
+jupyter
