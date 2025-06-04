@@ -3,7 +3,7 @@
 import torch
 import pickle
 import numpy as np
-from graphsvx import GraphSVX # type: ignore
+from models.explainability import GraphSVX  # Menggunakan model explainability yang telah dibuat
 from models.graphsage_model import InsiderThreatGraphSAGE  # pastikan path ini sesuai struktur proyek
 
 def explain_insider_predictions():
@@ -33,8 +33,8 @@ def explain_insider_predictions():
     explainer = GraphSVX(
         model=model,
         data=data,
-        num_samples=1000,         # untuk sampling nilai Shapley
-        max_subgraph_size=20      # batas ukuran subgraf untuk interpretasi
+        num_samples=1000,    # untuk sampling nilai Shapley
+        hops=3               # menggantikan max_subgraph_size
     )
 
     # Lakukan interpretasi untuk setiap user berisiko tinggi
@@ -42,15 +42,15 @@ def explain_insider_predictions():
     for user_idx in high_risk_users:
         explanation = explainer.explain_node(
             node_idx=user_idx,
-            node_type='user'
+            target_class=1  # Asumsi kelas 1 = insider threat
         )
 
         explanations[user_idx] = {
-            'shapley_values': explanation.shapley_values,
-            'important_subgraph': explanation.subgraph,
-            'feature_importance': explanation.feature_scores,
-            'neighboring_pcs': explanation.connected_nodes.get('pc', []),
-            'accessed_urls': explanation.connected_nodes.get('url', [])
+            'shapley_values': explanation['node_importance'],
+            'important_subgraph': explanation['subgraph_nodes'],
+            'feature_importance': explanation['feature_importance'],
+            'neighboring_pcs': [],  # Kosongkan dulu, bisa diisi manual jika diperlukan
+            'accessed_urls': []     # Kosongkan dulu, bisa diisi manual jika diperlukan
         }
 
     # Simpan hasil interpretasi ke file
