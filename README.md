@@ -1,5 +1,5 @@
 
-# IMPLEMENTASI MODEL GRAPHSAGE DAN GRAPHSVX UNTUK DETEKSI DAN INTERPRETASI POLA ANCAMAN INTERNAL DALAM PROFIL PERILAKU PADA dataset CERT INSIDER THREATS R6.2
+# IMPLEMENTASI MODEL GRAPHSAGE DAN GRAPHSVX
 
 ## Deskripsi  
 Penelitian ini bertujuan untuk menerapkan model GraphSAGE dalam menemukan pola tidak biasa pada dataset CERT Insider threats r6.2 dengan menggunakan representasi graf yang menunjukkan hubungan antara kegiatan pengguna. Penelitian ini juga akan menambahkan teknik GraphSVX untuk membantu menjelaskan faktor-faktor yang mempengaruhi hasil deteksi. Akhirnya, penelitian akan mempelajari pola perilaku pengguna yang dianggap tidak normal untuk memahami ciri-ciri ancaman internal dalam dataset yang digunakan.
