@@ -1,10 +1,8 @@
 
-# IMPLEMENTASI MODEL GRAPHSAGE DAN GRAPHSVX
+# Mini-project GraphSAGE & GraphSVX
+Mini-project ini bertujuan untuk menerapkan model GraphSAGE dalam menemukan pola tidak biasa pada dataset CERT Insider threats r6.2 menggunakan representasi graf yang menunjukkan hubungan antara kegiatan pengguna. Juga akan menambahkan teknik GraphSVX untuk membantu menjelaskan faktor-faktor yang mempengaruhi hasil deteksi.
 
-## Deskripsi  
-Penelitian ini bertujuan untuk menerapkan model GraphSAGE dalam menemukan pola tidak biasa pada dataset CERT Insider threats r6.2 dengan menggunakan representasi graf yang menunjukkan hubungan antara kegiatan pengguna. Penelitian ini juga akan menambahkan teknik GraphSVX untuk membantu menjelaskan faktor-faktor yang mempengaruhi hasil deteksi. Akhirnya, penelitian akan mempelajari pola perilaku pengguna yang dianggap tidak normal untuk memahami ciri-ciri ancaman internal dalam dataset yang digunakan.
-
-## Fitur Utama  
+### Fitur Utama  
 - Model heterogeneous graph dengan node user, PC, dan URL  
 - Multi-layer GraphSAGE untuk klasifikasi binary  
 - Penanganan class imbalance (imbalan kelas)  
@@ -12,7 +10,7 @@ Penelitian ini bertujuan untuk menerapkan model GraphSAGE dalam menemukan pola t
 - Interpretabilitas model dengan GraphSVX  
 - Visualisasi hasil prediksi dan penjelasan model
 
-## Struktur Direktori  
+### Struktur Direktori  
 ```
 data/                   # Dataset graph    
 models/                 # Model checkpoint  
@@ -22,7 +20,7 @@ README.md               # Dokumentasi ini
 requirements.txt        # Dependensi Python  
 ```
 
-## Cara Menjalankan  
+### Cara Menjalankan  
 1. Install dependencies:  
 ```bash
 pip install -r requirements.txt
@@ -33,21 +31,20 @@ pip install -r requirements.txt
 python main.py
 ```
 
-## Output Penting  
+### Output Penting  
 - `insider_threat_graphsage.pt` — Model hasil training  
 - `evaluation_results.pkl` — Hasil evaluasi model  
 - `graphsvx_explanations.pkl` — Penjelasan model dengan GraphSVX  
 
-## Tools & Library  
+### Tools & Library  
 - PyTorch & PyTorch Geometric  
-- GraphSVX  
 - scikit-learn  
 - matplotlib & seaborn  
 
-## Referensi
+### Referensi
 - [GraphSAGE Paper](https://cs.stanford.edu/people/jure/pubs/graphsage-nips17.pdf)  
 - [GraphSVX Paper](https://arxiv.org/pdf/2104.10482)  
 - [CERT Dataset](https://kilthub.cmu.edu/ndownloader/files/24844280)
 
-## Author  
+### Author  
 Tugas Akhir oleh [Aaz Zazri Nugraha](https://github.com/azzazry)
