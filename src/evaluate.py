@@ -37,6 +37,10 @@ def evaluate_insider_threat_model():
     model = HeteroGraphSAGE(hidden_dim=64, out_dim=2, num_layers=2)
     model.load_state_dict(torch.load('result/logs/insider_threat_graphsage.pt'))
     
+    # TAMBAHAN: Verifikasi model architecture
+    print(f"Model loaded with {sum(p.numel() for p in model.parameters())} parameters")
+    print(f"Model has user_context_agg layer: {hasattr(model, 'user_context_agg')}")
+    
     # Load training info
     with open('result/logs/training_info.pkl', 'rb') as f:
         training_info = pickle.load(f)
@@ -79,6 +83,11 @@ def evaluate_insider_threat_model():
             print(f"x_dict keys: {list(data.x_dict.keys())}")
             print(f"x_dict shapes: {[(k, v.shape if v is not None else 'None') for k, v in data.x_dict.items()]}")
             print(f"edge_index_dict keys: {list(filtered_edge_index_dict.keys())}")
+            print(f"Model architecture: {model}")
+            
+            # TAMBAHAN: Debug untuk model layers
+            if hasattr(model, 'user_context_agg'):
+                print(f"user_context_agg weight shape: {model.user_context_agg.weight.shape}")
             raise e
     
     print(f"Validation Accuracy: {val_acc:.4f}")
@@ -109,7 +118,8 @@ def evaluate_insider_threat_model():
         'recall': recall,
         'confusion_matrix': confusion_matrix(val_labels.cpu(), val_pred.cpu()),
         'training_info': training_info,
-        'edge_types_used': list(filtered_edge_index_dict.keys())  # Tambahan info
+        'edge_types_used': list(filtered_edge_index_dict.keys()),  # Tambahan info
+        'model_has_context_agg': hasattr(model, 'user_context_agg')  # TAMBAHAN: Info model architecture
     }
     
     with open('result/logs/evaluation_results.pkl', 'wb') as f:
@@ -126,6 +136,7 @@ def evaluate_insider_threat_model():
         f.write(f"Final Training Loss: {training_info['final_loss']:.4f}\n")
         f.write(f"Final Training Accuracy: {training_info['final_acc']:.4f}\n")
         f.write(f"Edge Types Used: {list(filtered_edge_index_dict.keys())}\n")  # Tambahan info
+        f.write(f"Model Has Context Aggregation: {hasattr(model, 'user_context_agg')}\n")  # TAMBAHAN
         f.write(f"\nValidation Set Distribution:\n")
         f.write(f"Normal Users: {(val_labels.cpu() == 0).sum().item()}\n")
         f.write(f"Insider Users: {(val_labels.cpu() == 1).sum().item()}\n")
@@ -135,3 +146,6 @@ def evaluate_insider_threat_model():
     
     print("Evaluation completed")
     return eval_results
+
+if __name__ == "__main__":
+    evaluate_insider_threat_model()

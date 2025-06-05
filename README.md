@@ -2,6 +2,9 @@
 # Mini-project GraphSAGE & GraphSVX
 Mini-project ini bertujuan untuk menerapkan model GraphSAGE dalam menemukan pola tidak biasa pada dataset CERT Insider threats r6.2 menggunakan representasi graf yang menunjukkan hubungan antara kegiatan pengguna. Juga akan menambahkan teknik GraphSVX untuk membantu menjelaskan faktor-faktor yang mempengaruhi hasil deteksi.
 
+### Abstak
+...
+
 ### Fitur Utama  
 - Model heterogeneous graph dengan node user, PC, dan URL  
 - Multi-layer GraphSAGE untuk klasifikasi binary  

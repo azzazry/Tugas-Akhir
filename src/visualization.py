@@ -243,3 +243,6 @@ def _plot_prediction_analysis(eval_results):
     plt.tight_layout()
     plt.savefig('result/visualizations/prediction_analysis.png', dpi=300, bbox_inches='tight')
     plt.close()
+    
+if __name__ == "__main__":
+    create_research_visualizations()

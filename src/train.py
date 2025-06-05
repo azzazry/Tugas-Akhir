@@ -106,6 +106,8 @@ def train_insider_threat_model():
             print(f"x_dict keys: {list(data.x_dict.keys())}")
             print(f"x_dict shapes: {[(k, v.shape if v is not None else 'None') for k, v in data.x_dict.items()]}")
             print(f"edge_index_dict keys: {list(filtered_edge_index_dict.keys())}")
+            print(f"Model layers: {list(model.named_modules())}")
+            print(f"user_context_agg weight shape: {model.user_context_agg.weight.shape}")
             raise e
     
     # Save model dan training info
@@ -124,3 +126,6 @@ def train_insider_threat_model():
     
     print(f"Training completed. Final loss: {train_losses[-1]:.4f}, Final acc: {train_accs[-1]:.4f}")
     return model, training_info
+
+if __name__ == "__main__":
+    train_insider_threat_model()
