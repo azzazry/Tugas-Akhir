@@ -1,50 +1,76 @@
-# train.py
-
 import torch
-import torch.nn as nn
 import torch.nn.functional as F
+from torch.optim import Adam
+from sklearn.metrics import accuracy_score, f1_score
+import numpy as np
 import pickle
-from sklearn.metrics import roc_auc_score
-from models.graphsage import InsiderThreatGraphSAGE
+from models.graphsage import HeteroGraphSAGE
 
 def train_insider_threat_model():
-    # Load preprocessed graph data
-    with open('data/data_objects.pkl', 'rb') as f:
-        data = pickle.load(f)
-
-    # Inisialisasi model dan optimizer
-    model = InsiderThreatGraphSAGE(data.metadata())
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
-
-    # Tangani class imbalance: hanya 2 user positif dari 1000 user
-    pos_weight = torch.tensor([498.0])  # 998 / 2
-    criterion = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
-
-    for epoch in range(500):
-        model.train()
+    """Training model Insider Threat GraphSAGE"""
+    print("Loading preprocessed data...")
+    data = torch.load('data/data_graph.pt', weights_only=False)
+    
+    print(f"Graph loaded: {data['user'].x.shape[0]} users, "
+          f"{data['pc'].x.shape[0]} PCs, {data['url'].x.shape[0]} URLs")
+    
+    # Initialize model
+    model = HeteroGraphSAGE(hidden_dim=64, out_dim=2, num_layers=2)
+    optimizer = Adam(model.parameters(), lr=0.01, weight_decay=5e-4)
+    
+    print(f"Model initialized with {sum(p.numel() for p in model.parameters())} parameters")
+    
+    # Debug: Print edge types yang tersedia
+    print("Available edge types:", list(data.edge_index_dict.keys()))
+    
+    model.train()
+    train_losses = []
+    train_accs = []
+    
+    epochs = 100
+    for epoch in range(epochs):
         optimizer.zero_grad()
-
+        
+        # Forward pass
         out = model(data.x_dict, data.edge_index_dict)
-        loss = criterion(out[data.train_mask], data.y[data.train_mask].float())
+        
+        # Handle oversampling
+        oversampling_info = data.oversampling_info
+        resampled_indices = oversampling_info['resampled_indices']
+        resampled_labels = torch.tensor(oversampling_info['resampled_labels'], dtype=torch.long)
+        
+        # Calculate loss
+        train_out = out[resampled_indices]
+        loss = F.cross_entropy(train_out, resampled_labels)
+        
+        # Backward pass
         loss.backward()
         optimizer.step()
-
-        # Validasi setiap 50 epoch
-        if epoch % 50 == 0:
-            model.eval()
-            with torch.no_grad():
-                val_out = model(data.x_dict, data.edge_index_dict)
-                val_pred = torch.sigmoid(val_out[data.val_mask])
-                val_auc = roc_auc_score(
-                    data.y[data.val_mask].cpu(),
-                    val_pred.cpu()
-                )
-                print(f"Epoch {epoch}, Loss: {loss:.4f}, Val AUC: {val_auc:.4f}")
-
-    # Simpan model terlatih
-    torch.save({
-        'model_state_dict': model.state_dict(),
-        'optimizer_state_dict': optimizer.state_dict(),
-        'epoch': epoch,
-        'val_auc': val_auc,
-    }, 'insider_threat_graphsage.pt')
+        
+        # Calculate accuracy
+        with torch.no_grad():
+            pred = train_out.argmax(dim=1)
+            train_acc = accuracy_score(resampled_labels.cpu(), pred.cpu())
+            
+        train_losses.append(loss.item())
+        train_accs.append(train_acc)
+        
+        if epoch % 20 == 0:
+            print(f'Epoch {epoch:03d}, Loss: {loss:.4f}, Train Acc: {train_acc:.4f}')
+    
+    # Save model dan training info
+    torch.save(model.state_dict(), 'result/logs/model.pth')
+    
+    training_info = {
+        'train_losses': train_losses,
+        'train_accs': train_accs,
+        'epochs': epochs,
+        'final_loss': train_losses[-1],
+        'final_acc': train_accs[-1]
+    }
+    
+    with open('result/logs/training_info.pkl', 'wb') as f:
+        pickle.dump(training_info, f)
+    
+    print(f"Training completed. Final loss: {train_losses[-1]:.4f}, Final acc: {train_accs[-1]:.4f}")
+    print("Model saved to result/logs/model.pth")

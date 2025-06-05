@@ -4,7 +4,7 @@ import traceback
 
 from src.train import train_insider_threat_model
 from src.evaluate import evaluate_insider_threat_model
-from src.explain import explain_insider_predictions
+# from src.explain import explain_insider_predictions
 from src.visualization import create_research_visualizations
 
 def create_directories():
@@ -23,7 +23,7 @@ def run_pipeline():
         evaluate_insider_threat_model()
 
         print("\n[4] Menjalankan interpretasi GraphSVX pada prediksi berisiko...")
-        explain_insider_predictions()
+        # explain_insider_predictions()
 
         print("\n[5] Membuat visualisasi hasil evaluasi dan interpretasi...")
         create_research_visualizations()
