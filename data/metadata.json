@@ -3,7 +3,7 @@
   "num_users": 1000,
   "num_pcs": 4298,
   "num_urls": 477,
-  "train_size": 800,
-  "val_size": 200,
+  "train_size": 799,
+  "val_size": 201,
   "insider_count": 2
 }

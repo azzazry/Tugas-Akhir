@@ -6,9 +6,7 @@ from sklearn.metrics import roc_curve, auc
 import pandas as pd
 
 def create_research_visualizations():
-    """Membuat visualisasi hasil evaluasi dan interpretasi untuk research"""
     print("Creating comprehensive visualizations...")
-    
     # Load evaluation results
     with open('result/logs/evaluation_results.pkl', 'rb') as f:
         eval_results = pickle.load(f)
@@ -19,16 +17,12 @@ def create_research_visualizations():
     
     # 1. Training Performance Overview
     _plot_training_overview(eval_results['training_info'])
-    
     # 2. Model Performance Dashboard
     _plot_performance_dashboard(eval_results)
-    
     # 3. ROC dan Precision-Recall Curves
     _plot_roc_pr_curves(eval_results)
-    
     # 4. Confusion Matrix dengan detail
     _plot_detailed_confusion_matrix(eval_results)
-    
     # 5. Model Prediction Analysis
     _plot_prediction_analysis(eval_results)
     

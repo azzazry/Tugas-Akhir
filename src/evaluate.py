@@ -11,34 +11,75 @@ def evaluate_insider_threat_model():
     # Load data
     data = torch.load('data/data_graph.pt', weights_only=False)
     
+    # Fix untuk NoneType error - pastikan semua x_dict tidak None (sama seperti training)
+    for node_type in ['user', 'pc', 'url']:
+        if node_type not in data.x_dict or data.x_dict[node_type] is None:
+            print(f"Warning: {node_type} features is None, creating dummy features")
+            if node_type == 'user':
+                num_nodes = data['user'].x.shape[0] if hasattr(data['user'], 'x') else data['user'].num_nodes
+                data.x_dict[node_type] = torch.randn(num_nodes, 6)
+            elif node_type == 'pc':
+                num_nodes = data['pc'].x.shape[0] if hasattr(data['pc'], 'x') else data['pc'].num_nodes
+                data.x_dict[node_type] = torch.randn(num_nodes, 4)
+            elif node_type == 'url':
+                num_nodes = data['url'].x.shape[0] if hasattr(data['url'], 'x') else data['url'].num_nodes
+                data.x_dict[node_type] = torch.randn(num_nodes, 3)
+    
+    # Pastikan format x_dict konsisten
+    if not hasattr(data, 'x_dict'):
+        data.x_dict = {
+            'user': data['user'].x,
+            'pc': data['pc'].x,
+            'url': data['url'].x
+        }
+    
     # Load model
     model = HeteroGraphSAGE(hidden_dim=64, out_dim=2, num_layers=2)
-    model.load_state_dict(torch.load('result/logs/model.pth'))
+    model.load_state_dict(torch.load('result/logs/insider_threat_graphsage.pt'))
     
     # Load training info
     with open('result/logs/training_info.pkl', 'rb') as f:
         training_info = pickle.load(f)
     
+    # Filter edge_index_dict untuk hanya gunakan unidirectional edges (sama seperti training)
+    expected_edge_types = [('user', 'uses', 'pc'), ('user', 'visits', 'url')]
+    filtered_edge_index_dict = {}
+    for edge_type in expected_edge_types:
+        if edge_type in data.edge_index_dict:
+            filtered_edge_index_dict[edge_type] = data.edge_index_dict[edge_type]
+    
+    print("Using edge types for evaluation:", list(filtered_edge_index_dict.keys()))
+    
     print("Evaluating model on validation set...")
     model.eval()
     with torch.no_grad():
-        out = model(data.x_dict, data.edge_index_dict)
-        
-        # Get probabilities for ROC analysis
-        val_mask = data['user'].val_mask
-        val_out = out[val_mask]
-        val_labels = data['user'].y[val_mask]
-        val_probs = torch.softmax(val_out, dim=1)
-        
-        val_pred = val_out.argmax(dim=1)
-        val_acc = accuracy_score(val_labels.cpu(), val_pred.cpu())
-        val_f1 = f1_score(val_labels.cpu(), val_pred.cpu(), average='weighted', zero_division=0)
-        
-        # Calculate additional metrics
         try:
-            val_auc = roc_auc_score(val_labels.cpu(), val_probs[:, 1].cpu())
-        except:
-            val_auc = 0.0  # Handle case when only one class in validation
+            # Forward pass dengan filtered edges (konsisten dengan training)
+            out = model(data.x_dict, filtered_edge_index_dict)
+            
+            # Get probabilities for ROC analysis
+            val_mask = data['user'].val_mask
+            val_out = out[val_mask]
+            val_labels = data['user'].y[val_mask]
+            val_probs = torch.softmax(val_out, dim=1)
+            
+            val_pred = val_out.argmax(dim=1)
+            val_acc = accuracy_score(val_labels.cpu(), val_pred.cpu())
+            val_f1 = f1_score(val_labels.cpu(), val_pred.cpu(), average='weighted', zero_division=0)
+            
+            # Calculate additional metrics
+            try:
+                val_auc = roc_auc_score(val_labels.cpu(), val_probs[:, 1].cpu())
+            except:
+                val_auc = 0.0  # Handle case when only one class in validation
+        
+        except Exception as e:
+            print(f"Error during evaluation: {e}")
+            print("Debugging info:")
+            print(f"x_dict keys: {list(data.x_dict.keys())}")
+            print(f"x_dict shapes: {[(k, v.shape if v is not None else 'None') for k, v in data.x_dict.items()]}")
+            print(f"edge_index_dict keys: {list(filtered_edge_index_dict.keys())}")
+            raise e
     
     print(f"Validation Accuracy: {val_acc:.4f}")
     print(f"Validation F1-Score: {val_f1:.4f}")
@@ -67,7 +108,8 @@ def evaluate_insider_threat_model():
         'precision': precision,
         'recall': recall,
         'confusion_matrix': confusion_matrix(val_labels.cpu(), val_pred.cpu()),
-        'training_info': training_info
+        'training_info': training_info,
+        'edge_types_used': list(filtered_edge_index_dict.keys())  # Tambahan info
     }
     
     with open('result/logs/evaluation_results.pkl', 'wb') as f:
@@ -83,6 +125,7 @@ def evaluate_insider_threat_model():
         f.write(f"Training Epochs: {training_info['epochs']}\n")
         f.write(f"Final Training Loss: {training_info['final_loss']:.4f}\n")
         f.write(f"Final Training Accuracy: {training_info['final_acc']:.4f}\n")
+        f.write(f"Edge Types Used: {list(filtered_edge_index_dict.keys())}\n")  # Tambahan info
         f.write(f"\nValidation Set Distribution:\n")
         f.write(f"Normal Users: {(val_labels.cpu() == 0).sum().item()}\n")
         f.write(f"Insider Users: {(val_labels.cpu() == 1).sum().item()}\n")

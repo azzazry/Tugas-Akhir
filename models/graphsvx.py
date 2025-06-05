@@ -149,10 +149,14 @@ class GraphSVX:
             try:
                 pred = self.model(perturbed_data.x, perturbed_data.edge_index)
                 if pred.dim() > 1:
-                    pred = pred[mapping]  # Get prediction for target node
+                    if isinstance(mapping, torch.Tensor) and mapping.numel() == 1:
+                        pred = pred[mapping.item()]
+                    else:
+                        pred = pred[mapping]
                 pred_prob = F.softmax(pred, dim=0)[target_class]
                 return pred_prob.item()
-            except:
+            except Exception as e:
+                print(f"Prediction error: {e}")
                 return 0.0
     
     def _compute_shapley_values(self, coalitions, predictions, num_players):
@@ -169,7 +173,8 @@ class GraphSVX:
             reg = LinearRegression(fit_intercept=True)
             reg.fit(X, y)
             shapley_values = reg.coef_
-        except:
+        except Exception as e:
+            print(f"Regression error: {e}")
             # Fallback to marginal contributions
             shapley_values = np.zeros(num_players)
             for i in range(num_players):
@@ -210,10 +215,14 @@ class GraphSVX:
                 try:
                     pred = self.model(perturbed_x, subgraph_data.edge_index)
                     if pred.dim() > 1:
-                        pred = pred[mapping]
+                        if isinstance(mapping, torch.Tensor) and mapping.numel() == 1:
+                            pred = pred[mapping.item()]
+                        else:
+                            pred = pred[mapping]
                     pred_prob = F.softmax(pred, dim=0)[target_class]
                     feature_predictions.append(pred_prob.item())
-                except:
+                except Exception as e:
+                    print(f"Feature prediction error: {e}")
                     feature_predictions.append(0.0)
         
         # Compute feature Shapley values
@@ -294,7 +303,8 @@ class GraphSVX:
                 
                 pred_prob = F.softmax(pred, dim=0)[target_class]
                 return pred_prob.item()
-            except:
+            except Exception as e:
+                print(f"Graph prediction error: {e}")
                 return 0.0
 
 
