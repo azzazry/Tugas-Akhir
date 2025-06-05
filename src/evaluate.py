@@ -90,5 +90,5 @@ def evaluate_insider_threat_model():
         f.write(classification_report(val_labels.cpu(), val_pred.cpu(), 
                                     target_names=['Normal', 'Insider'], zero_division=0))
     
-    print("Evaluation completed. Results saved to result/logs/")
+    print("Evaluation completed")
     return eval_results

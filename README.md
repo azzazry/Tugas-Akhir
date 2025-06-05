@@ -21,12 +21,18 @@ requirements.txt        # Dependensi Python
 ```
 
 ### Cara Menjalankan  
-1. Install dependencies:  
+1. Buat virtual environment:
+```bash
+python3 -m env env
+source env/bin/activate
+```
+
+2. Install dependencies:  
 ```bash
 pip install -r requirements.txt
 ```
 
-2. Jalankan pipeline:  
+3. Jalankan pipeline:  
 ```bash
 python main.py
 ```

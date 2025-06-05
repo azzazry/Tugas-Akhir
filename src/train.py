@@ -59,7 +59,7 @@ def train_insider_threat_model():
             print(f'Epoch {epoch:03d}, Loss: {loss:.4f}, Train Acc: {train_acc:.4f}')
     
     # Save model dan training info
-    torch.save(model.state_dict(), 'result/logs/model.pth')
+    torch.save(model.state_dict(), 'result/logs/insider_threat_graphsage.pt')
     
     training_info = {
         'train_losses': train_losses,
@@ -73,4 +73,3 @@ def train_insider_threat_model():
         pickle.dump(training_info, f)
     
     print(f"Training completed. Final loss: {train_losses[-1]:.4f}, Final acc: {train_accs[-1]:.4f}")
-    print("Model saved to result/logs/model.pth")
