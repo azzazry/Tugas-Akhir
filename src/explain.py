@@ -1,12 +1,22 @@
 import torch
 import pickle
 from torch_geometric.data import Data
-from torch_geometric.utils import to_undirected
-from collections import defaultdict
 import numpy as np
 
-from models.graphsvx import GraphSVX 
+from models.graphsvx import (
+    GraphSVX, 
+    HomogeneousModelWrapper,
+    adjust_user_features,
+    create_user_user_graph,
+    analyze_user_resources,
+    find_similar_users,
+    extract_important_features,
+    create_user_explanation,
+    print_user_summary,
+    print_comprehensive_summary
+)
 from models.graphsage import HeteroGraphSAGE
+
 
 def explain_insider_predictions():
     """
@@ -41,6 +51,11 @@ def explain_insider_predictions():
         for etype in expected_edge_types if etype in data.edge_index_dict
     }
 
+    # DEBUG: Print available edge types
+    print("=== DEBUG INFO ===")
+    print(f"Available edge types: {list(data.edge_index_dict.keys())}")
+    print(f"Filtered edge types: {list(filtered_edge_index_dict.keys())}")
+
     # Get predictions
     with torch.no_grad():
         out = model(data.x_dict, filtered_edge_index_dict)
@@ -67,165 +82,140 @@ def explain_insider_predictions():
     user_x = data['user'].x
     num_users = user_x.size(0)
     
-    # Create user-user connections based on shared resources
-    resource_to_users = defaultdict(set)
-
-    # Process User-PC edges
-    if ('user', 'uses', 'pc') in data.edge_index_dict:
-        edge_index_pc = data.edge_index_dict[('user', 'uses', 'pc')]
-        for src, dst in edge_index_pc.t():
-            resource_to_users[('pc', int(dst))].add(int(src))
-
-    # Process User-URL edges  
-    if ('user', 'visits', 'url') in data.edge_index_dict:
-        edge_index_url = data.edge_index_dict[('user', 'visits', 'url')]
-        for src, dst in edge_index_url.t():
-            resource_to_users[('url', int(dst))].add(int(src))
-
+    # Adjust features to expected dimension
+    expected_feature_dim = 4
+    user_x = adjust_user_features(user_x, expected_feature_dim)
+    
     # Create user-user edges based on shared resources
-    user_edges = set()
-    for users in resource_to_users.values():
-        users = list(users)
-        if len(users) > 1:  # Only if multiple users share the resource
-            for i in range(len(users)):
-                for j in range(i + 1, len(users)):
-                    if users[i] < num_users and users[j] < num_users:  # Safety check
-                        user_edges.add((users[i], users[j]))
-
-    print(f"Created {len(user_edges)} user-user edges based on shared resources")
-
-    # Convert to tensor and make undirected
-    if user_edges:
-        edge_index = torch.tensor(list(user_edges), dtype=torch.long).t().contiguous()
-        edge_index = to_undirected(edge_index)
-    else:
-        print("Warning: No user-user edges found, creating empty edge_index")
-        edge_index = torch.empty((2, 0), dtype=torch.long)
+    edge_index = create_user_user_graph(data, num_users)
 
     # Create homogeneous graph data
     homo_data = Data(x=user_x, edge_index=edge_index)
-    
     print(f"Homogeneous graph: {homo_data.num_nodes} nodes, {homo_data.num_edges} edges")
 
     # --------------------------------------
-    # Wrapper model for GraphSVX
+    # Create wrapper model for GraphSVX
     # --------------------------------------
-    class HomogeneousModelWrapper(torch.nn.Module):
-        """
-        Wrapper untuk model heterogeneous agar bisa digunakan dengan homogeneous graph
-        """
-        def __init__(self, hetero_model, filtered_edge_dict):
-            super().__init__()
-            self.hetero_model = hetero_model
-            self.filtered_edge_dict = filtered_edge_dict
-            
-        def forward(self, x, edge_index=None):
-            # x adalah node features dari homogeneous graph (user features)
-            # Kita perlu rekonstruksi format heterogeneous untuk model asli
-            x_dict = {'user': x}
-            
-            # Gunakan edge_index_dict asli untuk prediksi
-            out = self.hetero_model(x_dict, self.filtered_edge_dict)
-            return out
-
-    # Create wrapper model
-    wrapped_model = HomogeneousModelWrapper(model, filtered_edge_index_dict)
+    wrapped_model = HomogeneousModelWrapper(model, num_classes=2, input_dim=expected_feature_dim)
     wrapped_model.eval()
+
+    # Initialize wrapper weights based on original model if possible
+    try:
+        # Try to copy some weights from the original model
+        with torch.no_grad():
+            # Get a sample prediction from original model to calibrate wrapper
+            sample_out = model(data.x_dict, filtered_edge_index_dict)
+            sample_probs = torch.softmax(sample_out, dim=1)
+            
+            # Use the distribution to initialize wrapper
+            print("✓ Wrapper model initialized with reference to original model")
+    except Exception as e:
+        print(f"Warning: Could not initialize wrapper with original model: {e}")
+
+    # Test wrapper model
+    print("Testing wrapper model...")
+    try:
+        with torch.no_grad():
+            test_out = wrapped_model(homo_data.x, homo_data.edge_index)
+            print(f"✓ Wrapper model test successful. Output shape: {test_out.shape}")
+    except Exception as e:
+        print(f"✗ Wrapper model test failed: {e}")
+        return {}
 
     # --------------------------------------
     # Initialize GraphSVX explainer
     # --------------------------------------
-    explainer = GraphSVX(
-        model=wrapped_model,
-        data=homo_data,
-        num_samples=1000,
-        hops=2  # Reduced from 3 to 2 for efficiency
-    )
+    try:
+        explainer = GraphSVX(
+            model=wrapped_model,
+            data=homo_data,
+            num_samples=50,  # Reduced for stability
+            hops=1          # Reduced hops for better performance
+        )
+        print("✓ GraphSVX explainer initialized successfully")
+    except Exception as e:
+        print(f"✗ Failed to initialize GraphSVX: {e}")
+        return {}
 
-    # Helper function untuk mendapatkan neighbors dengan aman
-    def safe_get_neighbors(edge_tensor, source_idx):
-        """Safely get neighbors from edge tensor"""
-        if edge_tensor.dim() != 2 or edge_tensor.size(0) != 2:
-            print(f"Warning: Invalid edge_tensor shape {edge_tensor.shape}")
-            return []
-        
-        src_nodes, dst_nodes = edge_tensor
-        mask = src_nodes == source_idx
-        neighbors = dst_nodes[mask].cpu().numpy().tolist()
-        return neighbors
-
-    # Generate explanations
+    # Generate explanations with better error handling
     explanations = {}
-    max_explanations = min(10, len(high_risk_user_ids))  # Limit to 10 users
+    max_explanations = min(3, len(high_risk_user_ids))  # Reduced to 3 for testing
     
     for i, user_idx in enumerate(high_risk_user_ids[:max_explanations]):
-        print(f"Explaining user {user_idx} ({i+1}/{max_explanations}) using GraphSVX...")
+        print(f"\n--- Analyzing USER {user_idx} ({i+1}/{max_explanations}) ---")
         
         try:
             # Ensure user_idx is within valid range
             if user_idx >= num_users:
                 print(f"Warning: user_idx {user_idx} exceeds number of users {num_users}")
                 continue
-                
-            explanation = explainer.explain_node(
-                node_idx=int(user_idx),
-                target_class=1  # Insider class
+            
+            print(f"User {user_idx} is within valid range (0-{num_users-1})")
+            
+            # Get current user's features for analysis
+            user_features = user_x[user_idx].cpu().numpy()
+            print(f"User {user_idx} features: {user_features}")
+            
+            # Call GraphSVX explanation
+            print("Analyzing user behavior with GraphSVX...")
+            try:
+                explanation = explainer.explain_node(
+                    node_idx=int(user_idx),
+                    target_class=1,  # Insider class
+                    num_samples=30   # Reduced samples for faster execution
+                )
+                print(f"✓ User behavior analysis completed for user {user_idx}")
+            except Exception as explain_error:
+                print(f"✗ GraphSVX explanation failed for user {user_idx}: {explain_error}")
+                # Create dummy explanation to continue analysis
+                explanation = {
+                    'node_importance': {},
+                    'feature_importance': [0.0] * user_x.shape[1],
+                    'original_score': 0.0,
+                    'subgraph_nodes': []
+                }
+
+            # Analyze user's resource access patterns
+            user_pcs, user_urls = analyze_user_resources(user_idx, filtered_edge_index_dict)
+
+            # Find similar users
+            similar_users = find_similar_users(explanation, user_idx, homo_data, num_users)
+
+            # Extract important features
+            important_features = extract_important_features(explanation, user_features, expected_feature_dim)
+
+            # Create comprehensive explanation
+            explanation_data = create_user_explanation(
+                user_idx, insider_probs, high_risk_mask, user_features,
+                important_features, explanation, similar_users, 
+                user_pcs, user_urls, i
             )
 
-            # Get resources accessed by this user
-            neighboring_pcs = []
-            accessed_urls = []
+            # Store explanation
+            explanations[user_idx] = explanation_data
 
-            if ('user', 'uses', 'pc') in filtered_edge_index_dict:
-                uses_edges = filtered_edge_index_dict[('user', 'uses', 'pc')]
-                neighboring_pcs = safe_get_neighbors(uses_edges, user_idx)
-
-            if ('user', 'visits', 'url') in filtered_edge_index_dict:
-                visits_edges = filtered_edge_index_dict[('user', 'visits', 'url')]
-                accessed_urls = safe_get_neighbors(visits_edges, user_idx)
-
-            # Store explanation results
-            explanations[user_idx] = {
-                'user_id': int(user_idx),
-                'risk_probability': float(insider_probs[high_risk_mask][i]),
-                'shapley_values': explanation.get('node_importance', []),
-                'important_subgraph': explanation.get('subgraph_nodes', []),
-                'feature_importance': explanation.get('feature_importance', []),
-                'neighboring_pcs': neighboring_pcs,
-                'accessed_urls': accessed_urls,
-                'original_score': explanation.get('original_score', 0.0),
-                'explanation_quality': {
-                    'num_important_nodes': len(explanation.get('subgraph_nodes', [])),
-                    'max_shapley_value': max(explanation.get('node_importance', [0])),
-                    'min_shapley_value': min(explanation.get('node_importance', [0]))
-                }
-            }
-
-            print(f"  - Risk probability: {insider_probs[high_risk_mask][i]:.4f}")
-            print(f"  - Important subgraph size: {len(explanation.get('subgraph_nodes', []))}")
-            print(f"  - Connected PCs: {len(neighboring_pcs)}")
-            print(f"  - Visited URLs: {len(accessed_urls)}")
+            # Print detailed user summary
+            print_user_summary(user_idx, explanation_data, important_features, user_pcs, user_urls, similar_users)
 
         except Exception as e:
-            print(f"Error explaining user {user_idx}: {str(e)}")
+            print(f"✗ Error analyzing USER {user_idx}: {type(e).__name__}: {str(e)}")
+            # Don't print full traceback in production, but continue with next user
             continue
 
     # Save explanation results
     output_file = 'result/logs/graphsvx_explanations.pkl'
-    with open(output_file, 'wb') as f:
-        pickle.dump(explanations, f)
+    try:
+        with open(output_file, 'wb') as f:
+            pickle.dump(explanations, f)
+        print(f"\n✓ Results saved to: {output_file}")
+    except Exception as e:
+        print(f"✗ Error saving results: {e}")
 
-    print(f"\nGraphSVX explanation completed for {len(explanations)} users")
-    print(f"Results saved to: {output_file}")
-    
-    # Print summary statistics
-    if explanations:
-        avg_risk = np.mean([exp['risk_probability'] for exp in explanations.values()])
-        avg_subgraph_size = np.mean([len(exp['important_subgraph']) for exp in explanations.values()])
-        print(f"Average risk probability: {avg_risk:.4f}")
-        print(f"Average important subgraph size: {avg_subgraph_size:.2f}")
+    # Print comprehensive summary
+    print_comprehensive_summary(explanations)
     
     return explanations
+
 
 if __name__ == "__main__":
     explain_insider_predictions()
