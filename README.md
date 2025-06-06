@@ -26,7 +26,11 @@ requirements.txt        # Dependensi Python
 ### Cara Menjalankan  
 1. Buat virtual environment:
 ```bash
-python3 -m env env
+python -m env env
+
+# Windows
+env/Scripts/activate
+# Linux
 source env/bin/activate
 ```
 
