@@ -27,7 +27,9 @@ requirements.txt        # Dependensi Python
 1. Buat virtual environment:
 ```bash
 python -m env env
-
+```
+2. Jalankan virtual environment:
+```bash
 # Windows
 env/Scripts/activate
 # Linux
