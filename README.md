@@ -1,5 +1,4 @@
-
-# Mini-project GraphSAGE & GraphSVX
+# GNN Project: GraphSAGE & GraphSVX
 Mini-project ini bertujuan untuk menerapkan model GraphSAGE dalam menemukan pola tidak biasa pada dataset CERT Insider threats r6.2 menggunakan representasi graf yang menunjukkan hubungan antara kegiatan pengguna. Juga akan menambahkan teknik GraphSVX untuk membantu menjelaskan faktor-faktor yang mempengaruhi hasil deteksi.
 
 ### Abstak
