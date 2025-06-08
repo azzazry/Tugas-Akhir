@@ -73,6 +73,6 @@ python src.visualization       # Visualisasi hasil
 - CERT Carnegie Mellon. [*Insider Threat Dataset*](https://kilthub.cmu.edu/ndownloader/files/24844280)
 
 ### Penulis
-Tugas Akhir oleh [**Aaz Zazri Nugraha**](https://github.com/azzazry)  
+Tugas Akhir oleh [Aaz Zazri Nugraha](https://github.com/azzazry)  
 Fakultas Teknik dan Teknologi Informasi, Universitas Jenderal Achmad Yani Yogyakarta (2025)  
 _Email: azzazry120@email.com_
