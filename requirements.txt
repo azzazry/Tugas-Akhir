@@ -5,10 +5,12 @@ numpy
 # Machine learning
 torch
 torch-geometric
-torchvision
 scikit-learn
-imbalanced-learn
+# imbalanced-learn
 
 # Data visualization
 matplotlib
 seaborn
+
+# Jupyter notebook
+# jupyter
