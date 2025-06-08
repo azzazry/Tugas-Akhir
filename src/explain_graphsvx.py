@@ -2,7 +2,6 @@ import torch
 import torch.nn.functional as F
 import pickle
 from models.graphsage import GraphSAGE
-from torch_geometric.data import HeteroData
 
 class GraphSVXExplainer:
     def __init__(self, model, node_type='user', num_samples=20):
@@ -11,67 +10,171 @@ class GraphSVXExplainer:
         self.num_samples = num_samples
 
     def explain(self, x_dict, edge_index_dict, target_node_idx):
-        base_pred = self.model(x_dict, edge_index_dict)[target_node_idx]
-        base_pred = F.softmax(base_pred, dim=0)
-        
-        x_orig = x_dict[self.node_type][target_node_idx].clone()
-        num_feats = x_orig.shape[0]
-        
-        importances = torch.zeros(num_feats)
-        for i in range(self.num_samples):
-            mask = torch.bernoulli(torch.full_like(x_orig, 0.5))
-            x_masked = x_orig * mask
-            x_dict_mod = x_dict.copy()
-            x_dict_mod[self.node_type] = x_dict[self.node_type].clone()
-            x_dict_mod[self.node_type][target_node_idx] = x_masked
+        with torch.no_grad():  # Disable gradient computation
+            # Prediksi asli
+            base_pred = self.model(x_dict, edge_index_dict)[target_node_idx]
+            base_pred = F.softmax(base_pred, dim=0)
             
-            pred = self.model(x_dict_mod, edge_index_dict)[target_node_idx]
-            pred = F.softmax(pred, dim=0)
-            delta = base_pred - pred
-            importances += torch.abs(delta[1]) * mask
-        
-        return (importances / self.num_samples).cpu().numpy()
+            x_orig = x_dict[self.node_type][target_node_idx].clone()
+            num_feats = x_orig.shape[0]
+            
+            importances = torch.zeros(num_feats)
+            for i in range(self.num_samples):
+                # Mask random features
+                mask = torch.bernoulli(torch.full_like(x_orig, 0.5))
+                x_masked = x_orig * mask
+                
+                # Copy x_dict dan ganti target node
+                x_dict_mod = {k: v.clone() for k, v in x_dict.items()}
+                x_dict_mod[self.node_type][target_node_idx] = x_masked
+                
+                # Prediksi dengan features yang dimasking
+                pred = self.model(x_dict_mod, edge_index_dict)[target_node_idx]
+                pred = F.softmax(pred, dim=0)
+                
+                # Hitung selisih prediksi (fokus pada class insider = 1)
+                delta = base_pred - pred
+                importances += torch.abs(delta[1]) * mask
+            
+            return (importances / self.num_samples).cpu().numpy()
 
 def explain_insider_predictions():
-    data: HeteroData = torch.load('data/data_graph.pt', weights_only=False)
+    # Load data dan model
+    data = torch.load('data/data_graph.pt', weights_only=False)
     model = GraphSAGE(hidden_dim=64, out_dim=2, num_layers=2)
     model.load_state_dict(torch.load('result/logs/insider_threat_graphsage.pt'))
     model.eval()
 
-    x_dict = {
-        'user': data['user'].x,
-        'pc': data['pc'].x,
-        'url': data['url'].x
-    }
-    edge_index_dict = {
-        ('user', 'uses', 'pc'): data['user', 'uses', 'pc'].edge_index,
-        ('user', 'visits', 'url'): data['user', 'visits', 'url'].edge_index,
-        ('user', 'interacts', 'user'): data['user', 'interacts', 'user'].edge_index
-    }
+    # Sesuaikan dengan struktur data Anda
+    if hasattr(data, 'x_dict'):
+        x_dict = data.x_dict
+    else:
+        x_dict = {
+            'user': data['user'].x,
+            'pc': data['pc'].x,
+            'url': data['url'].x
+        }
+
+    # Edge index sesuai dengan model Anda
+    expected_edges = [('user', 'uses', 'pc'), ('user', 'visits', 'url'), ('user', 'interacts', 'user')]
+    edge_index_dict = {etype: data.edge_index_dict[etype] for etype in expected_edges if etype in data.edge_index_dict}
 
     print("Running inference to detect insider users...")
     with torch.no_grad():
         out = model(x_dict, edge_index_dict)
+        probs = F.softmax(out, dim=1)
         predictions = out.argmax(dim=1)
-        insider_indices = (predictions == 1).nonzero(as_tuple=True)[0]
+        
+        # PERBAIKAN: Gunakan threshold probability alih-alih argmax
+        insider_threshold = 0.3  # Threshold lebih rendah untuk data imbalanced
+        insider_candidates = (probs[:, 1] > insider_threshold).nonzero(as_tuple=True)[0]
+        
+        print(f"Users with insider probability > {insider_threshold}: {len(insider_candidates)}")
+        
+        # Jika tidak ada yang memenuhi threshold, ambil top 5 berdasarkan probabilitas
+        if len(insider_candidates) == 0:
+            print("No users meet the threshold. Taking top 5 highest probabilities...")
+            top_probs, top_indices = torch.topk(probs[:, 1], k=min(5, len(probs)))
+            insider_candidates = top_indices
+            print(f"Top 5 insider probabilities: {top_probs.tolist()}")
+        
+        insider_probs = probs[insider_candidates, 1]
 
-    print(f"Found {len(insider_indices)} users predicted as insiders.")
+    print(f"Analyzing {len(insider_candidates)} users with highest insider risk...")
 
-    # Ambil max 5 insiders untuk dijelaskan
-    explain_indices = insider_indices[:5]
+    # Ambil top 5 untuk dijelaskan
+    sorted_indices = torch.argsort(insider_probs, descending=True)
+    explain_indices = insider_candidates[sorted_indices[:5]]
 
     explainer = GraphSVXExplainer(model=model, node_type='user', num_samples=30)
     explanations = {}
 
-    for idx in explain_indices:
-        importance = explainer.explain(x_dict, edge_index_dict, idx.item())
-        explanations[idx.item()] = importance.tolist()
-        print(f"User {idx.item()} → Feature importance: {importance.round(3)}")
+    # Feature names untuk user
+    feature_names = [
+        'total_logon_events', 'total_file_events', 'total_device_events',
+        'total_http_events', 'role_encoded', 'department_encoded'
+    ]
 
+    for idx in explain_indices:
+        user_idx = idx.item()
+        prob = probs[idx, 1].item()
+        user_features = x_dict['user'][idx]
+        
+        print(f"\nUser {user_idx} - Insider Probability: {prob:.3f}")
+        
+        # Klasifikasi risiko berdasarkan probabilitas
+        if prob > 0.5:
+            risk_class = "HIGH RISK"
+        elif prob > 0.3:
+            risk_class = "MEDIUM RISK"
+        else:
+            risk_class = "LOW RISK (Top Candidate)"
+        
+        print(f"Risk Classification: {risk_class}")
+        print("-" * 40)
+        
+        # Dapatkan feature importance
+        importance = explainer.explain(x_dict, edge_index_dict, user_idx)
+        
+        # Tampilkan top 3 features yang paling berpengaruh
+        top_indices = importance.argsort()[-3:][::-1]
+        
+        print("Key risk indicators:")
+        for i, feat_idx in enumerate(top_indices):
+            feat_name = feature_names[feat_idx] if feat_idx < len(feature_names) else f"feature_{feat_idx}"
+            feat_value = user_features[feat_idx].item()
+            feat_importance = importance[feat_idx]
+            
+            # Interpretasi berdasarkan nilai dan importance
+            if feat_importance > 0.05:
+                interpretation = interpret_feature(feat_name, feat_value, feat_importance)
+                print(f"  {i+1}. {feat_name}: {interpretation}")
+        
+        # Rekomendasi tindakan
+        print(f"Recommendation: {get_recommendation(prob)}")
+        
+        # Simpan hasil
+        explanations[user_idx] = {
+            'importance_scores': importance.tolist(),
+            'probability': prob,
+            'risk_classification': risk_class,
+            'top_features': [(feature_names[i] if i < len(feature_names) else f"feature_{i}", 
+                            user_features[i].item(), importance[i]) for i in top_indices]
+        }
+
+    # Simpan hasil
     with open('result/logs/graphsvx_explanations.pkl', 'wb') as f:
         pickle.dump(explanations, f)
 
-    print("GraphSVX explanations tersimpan!")
+    print(f"\nGraphSVX explanations saved to result/logs/graphsvx_explanations.pkl")
+    print(f"Analyzed {len(explanations)} users with highest insider risk.")
+    
+    # Summary statistics
+    print(f"\nKesimpulan:")
+    print(f"- Total users analyzed: {len(x_dict['user'])}")
+    print(f"- Users meeting threshold (>{insider_threshold}): {len(insider_candidates)}")
+    print(f"- Max insider probability: {probs[:, 1].max():.3f}")
+    print(f"- Average insider probability: {probs[:, 1].mean():.3f}")
+
+def interpret_feature(feat_name, value, importance):
+    interpretations = {
+        'total_logon_events': f"Login rate: {value:.3f} (impact: {importance:.3f})",
+        'total_file_events': f"File activity: {value:.3f} (impact: {importance:.3f})",
+        'total_device_events': f"Device access: {value:.3f} (impact: {importance:.3f})",
+        'total_http_events': f"visits to url: {value:.3f} (impact: {importance:.3f})",
+        'role_encoded': f"url_encoded: {value:.3f} (impact: {importance:.3f})",
+        'department_encoded': f"departmenet_encoded: {value:.3f} (impact: {importance:.3f})"
+    }
+    return interpretations.get(feat_name, f"Value: {value:.3f} (impact: {importance:.3f})")
+
+def get_recommendation(prob):
+    """Rekomendasi berdasarkan probabilitas"""
+    if prob > 0.5:
+        return "Enhanced monitoring and access review required"
+    elif prob > 0.3:
+        return "Regular monitoring recommended"
+    else:
+        return "Standard monitoring sufficient"
 
 if __name__ == "__main__":
     explain_insider_predictions()
