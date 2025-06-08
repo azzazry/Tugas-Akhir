@@ -58,9 +58,9 @@ python src.visualization       # Visualisasi hasil
 ```
 
 ### Output Utama
-`models/insider_threat_graphsage.pt` – File model hasil training
-`result/evaluation_results.pkl` – Ringkasan metrik evaluasi
-`result/graphsvx_explanations.pkl` – Hasil interpretasi dengan GraphSVX
+`models/insider_threat_graphsage.pt` – File model hasil training</br>
+`result/evaluation_results.pkl` – Ringkasan metrik evaluasi</br>
+`result/graphsvx_explanations.pkl` – Hasil interpretasi dengan GraphSVX</br>
 
 ### Pustaka yang Digunakan
 - PyTorch & PyTorch Geometric – Untuk implementasi GraphSAGE
