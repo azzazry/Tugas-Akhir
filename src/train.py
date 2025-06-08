@@ -10,7 +10,7 @@ def train_insider_threat_model():
     data = torch.load('data/data_graph.pt', weights_only=False)
     
     # Inisialisasi model & optimizer sederhana
-    model = GraphSAGE(hidden_dim=64, out_dim=2)
+    model = GraphSAGE(hidden_dim=64, out_dim=2, num_layers=2)
     optimizer = Adam(model.parameters(), lr=0.01, weight_decay=5e-4)
     
     model.train()

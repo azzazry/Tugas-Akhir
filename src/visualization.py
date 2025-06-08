@@ -2,9 +2,11 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
 import pickle
-from sklearn.metrics import roc_curve, auc
+from sklearn.metrics import roc_curve, auc, precision_recall_curve
 import networkx as nx
 import pandas as pd
+import warnings
+warnings.filterwarnings('ignore')
 
 def create_research_visualizations():
     print("Creating comprehensive visualizations...")
@@ -67,7 +69,12 @@ def _plot_performance_dashboard(eval_results):
     
     # 1. Metrics comparison bar plot
     metrics = ['Accuracy', 'F1-Score', 'AUC']
-    values = [eval_results['val_accuracy'], eval_results['val_f1_score'], eval_results['val_auc']]
+    # Handle NaN values in metrics
+    auc_value = eval_results.get('val_auc', 0)
+    if np.isnan(auc_value):
+        auc_value = 0
+    
+    values = [eval_results['val_accuracy'], eval_results['val_f1_score'], auc_value]
     colors = ['skyblue', 'lightgreen', 'salmon']
     
     bars = ax1.bar(metrics, values, color=colors, alpha=0.8)
@@ -77,8 +84,9 @@ def _plot_performance_dashboard(eval_results):
     
     # Add value labels on bars
     for bar, value in zip(bars, values):
+        label = f'{value:.3f}' if not np.isnan(value) else 'N/A'
         ax1.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.01, 
-                f'{value:.3f}', ha='center', va='bottom', fontweight='bold')
+                label, ha='center', va='bottom', fontweight='bold')
     
     # 2. Class distribution
     true_labels = eval_results['val_true_labels']
@@ -101,32 +109,51 @@ def _plot_performance_dashboard(eval_results):
     ax2.legend()
     
     # 3. Prediction confidence distribution
-    if eval_results['val_probabilities'].shape[1] > 1:
+    if 'val_probabilities' in eval_results and eval_results['val_probabilities'].shape[1] > 1:
         insider_probs = eval_results['val_probabilities'][:, 1]
         ax3.hist(insider_probs[true_labels == 0], alpha=0.7, label='Normal Users', bins=20, color='blue')
-        ax3.hist(insider_probs[true_labels == 1], alpha=0.7, label='Insider Users', bins=20, color='red')
+        if np.sum(true_labels == 1) > 0:  # Check if there are insider users
+            ax3.hist(insider_probs[true_labels == 1], alpha=0.7, label='Insider Users', bins=20, color='red')
         ax3.set_title('Prediction Confidence Distribution', fontsize=14, fontweight='bold')
         ax3.set_xlabel('Insider Probability')
         ax3.set_ylabel('Frequency')
         ax3.legend()
+    else:
+        ax3.text(0.5, 0.5, 'No probability\ndata available', ha='center', va='center', 
+                transform=ax3.transAxes, fontsize=12)
+        ax3.set_title('Prediction Confidence Distribution', fontsize=14, fontweight='bold')
     
     # 4. Model complexity info
     ax4.axis('off')
+    
+    # Safely get model parameters
+    model_params = eval_results.get('model_parameters', 'N/A')
+    if isinstance(model_params, (int, float)):
+        param_str = f"{model_params:,}"
+    else:
+        param_str = str(model_params)
+    
+    # Safely get training info
+    training_info = eval_results.get('training_info', {})
+    epochs = training_info.get('epochs', 'N/A')
+    final_loss = training_info.get('final_loss', 0)
+    final_acc = training_info.get('final_acc', 0)
+    
     info_text = f"""Model Architecture Summary:
     
-    Parameters: {eval_results['model_parameters']:,}
+    Parameters: {param_str}
     Hidden Dimension: 64
     Number of Layers: 2
     
     Training Summary:
-    Epochs: {eval_results['training_info']['epochs']}
-    Final Loss: {eval_results['training_info']['final_loss']:.4f}
-    Final Train Acc: {eval_results['training_info']['final_acc']:.4f}
+    Epochs: {epochs}
+    Final Loss: {final_loss:.4f}
+    Final Train Acc: {final_acc:.4f}
     
     Validation Results:
     Accuracy: {eval_results['val_accuracy']:.4f}
     F1-Score: {eval_results['val_f1_score']:.4f}
-    AUC: {eval_results['val_auc']:.4f}"""
+    AUC: {'N/A' if np.isnan(auc_value) else f'{auc_value:.4f}'}"""
     
     ax4.text(0.1, 0.9, info_text, transform=ax4.transAxes, fontsize=11,
              verticalalignment='top', bbox=dict(boxstyle='round', facecolor='lightgray', alpha=0.8))
@@ -143,7 +170,10 @@ def _plot_roc_pr_curves(eval_results):
     true_labels = eval_results['val_true_labels']
     
     # ROC Curve
-    if eval_results['val_probabilities'].shape[1] > 1 and len(np.unique(true_labels)) > 1:
+    if ('val_probabilities' in eval_results and 
+        eval_results['val_probabilities'].shape[1] > 1 and 
+        len(np.unique(true_labels)) > 1):
+        
         probs = eval_results['val_probabilities'][:, 1]
         fpr, tpr, _ = roc_curve(true_labels, probs)
         roc_auc = auc(fpr, tpr)
@@ -157,11 +187,18 @@ def _plot_roc_pr_curves(eval_results):
         ax1.set_title('Receiver Operating Characteristic (ROC) Curve', fontweight='bold')
         ax1.legend(loc="lower right")
         ax1.grid(True, alpha=0.3)
+    else:
+        ax1.text(0.5, 0.5, 'ROC curve not available\n(single class dataset)', 
+                ha='center', va='center', transform=ax1.transAxes, fontsize=12)
+        ax1.set_title('Receiver Operating Characteristic (ROC) Curve', fontweight='bold')
     
     # Precision-Recall Curve
-    if 'precision' in eval_results and 'recall' in eval_results:
-        precision = eval_results['precision']
-        recall = eval_results['recall']
+    if ('val_probabilities' in eval_results and 
+        eval_results['val_probabilities'].shape[1] > 1 and 
+        len(np.unique(true_labels)) > 1):
+        
+        probs = eval_results['val_probabilities'][:, 1]
+        precision, recall, _ = precision_recall_curve(true_labels, probs)
         
         ax2.plot(recall, precision, color='blue', lw=2, label='PR curve')
         ax2.set_xlabel('Recall')
@@ -171,6 +208,10 @@ def _plot_roc_pr_curves(eval_results):
         ax2.grid(True, alpha=0.3)
         ax2.set_xlim([0.0, 1.0])
         ax2.set_ylim([0.0, 1.05])
+    else:
+        ax2.text(0.5, 0.5, 'PR curve not available\n(single class dataset)', 
+                ha='center', va='center', transform=ax2.transAxes, fontsize=12)
+        ax2.set_title('Precision-Recall Curve', fontweight='bold')
     
     plt.tight_layout()
     plt.savefig('result/visualizations/roc_pr_curves.png', dpi=300, bbox_inches='tight')
@@ -192,10 +233,11 @@ def _plot_detailed_confusion_matrix(eval_results):
     
     # Add percentage annotations
     total = np.sum(cm)
-    for i in range(cm.shape[0]):
-        for j in range(cm.shape[1]):
-            plt.text(j + 0.5, i + 0.7, f'({cm[i,j]/total*100:.1f}%)', 
-                    ha='center', va='center', fontsize=10, color='gray')
+    if total > 0:
+        for i in range(cm.shape[0]):
+            for j in range(cm.shape[1]):
+                plt.text(j + 0.5, i + 0.7, f'({cm[i,j]/total*100:.1f}%)', 
+                        ha='center', va='center', fontsize=10, color='gray')
     
     plt.tight_layout()
     plt.savefig('result/visualizations/detailed_confusion_matrix.png', dpi=300, bbox_inches='tight')
@@ -246,6 +288,7 @@ def _plot_prediction_analysis(eval_results):
     plt.close()
     
 def _plot_sample_graph_structure():
+    """Visualisasi struktur graph user-resource"""
     G = nx.Graph()
 
     user_nodes = [f"user_{i}" for i in range(5)]
@@ -270,23 +313,49 @@ def _plot_sample_graph_structure():
             node_size=700, font_size=9, edge_color='gray')
     plt.title("User-Resource Interaction Graph", fontsize=14, fontweight='bold')
     plt.tight_layout()
-    plt.savefig("result/visualizations/sample_graph_structure.png", dpi=300)
+    plt.savefig("result/visualizations/sample_graph_structure.png", dpi=300, bbox_inches='tight')
     plt.close()
 
 def _plot_top_suspicious_users(eval_results):
-    if 'val_probabilities' in eval_results and eval_results['val_probabilities'].shape[1] > 1:
+    """Visualisasi top suspicious users"""
+    if ('val_probabilities' in eval_results and 
+        eval_results['val_probabilities'].shape[1] > 1):
+        
         insider_probs = eval_results['val_probabilities'][:, 1]
         user_ids = np.arange(len(insider_probs))
-        top_users_idx = np.argsort(insider_probs)[-10:][::-1]  # Top 10
+        
+        # Only plot if we have varying probabilities
+        if len(np.unique(insider_probs)) > 1:
+            top_users_idx = np.argsort(insider_probs)[-10:][::-1]  # Top 10
 
+            plt.figure(figsize=(10, 6))
+            sns.barplot(x=insider_probs[top_users_idx], 
+                       y=[f"User {i}" for i in top_users_idx], 
+                       palette="Reds_r")
+            plt.xlabel("Predicted Insider Probability")
+            plt.ylabel("User ID")
+            plt.title("Top 10 Suspicious Users Based on Prediction Probability", fontsize=14, fontweight='bold')
+            plt.xlim(0, 1)
+            plt.tight_layout()
+            plt.savefig("result/visualizations/top_suspicious_users.png", dpi=300, bbox_inches='tight')
+            plt.close()
+        else:
+            # All users have same probability
+            plt.figure(figsize=(10, 6))
+            plt.text(0.5, 0.5, 'All users have identical\nprediction probabilities', 
+                    ha='center', va='center', fontsize=16, transform=plt.gca().transAxes)
+            plt.title("Top 10 Suspicious Users Based on Prediction Probability", fontsize=14, fontweight='bold')
+            plt.tight_layout()
+            plt.savefig("result/visualizations/top_suspicious_users.png", dpi=300, bbox_inches='tight')
+            plt.close()
+    else:
+        # No probability data available
         plt.figure(figsize=(10, 6))
-        sns.barplot(x=insider_probs[top_users_idx], y=[f"User {i}" for i in top_users_idx], palette="Reds_r")
-        plt.xlabel("Predicted Insider Probability")
-        plt.ylabel("User ID")
+        plt.text(0.5, 0.5, 'No probability data\navailable for analysis', 
+                ha='center', va='center', fontsize=16, transform=plt.gca().transAxes)
         plt.title("Top 10 Suspicious Users Based on Prediction Probability", fontsize=14, fontweight='bold')
-        plt.xlim(0, 1)
         plt.tight_layout()
-        plt.savefig("result/visualizations/top_suspicious_users.png", dpi=300)
+        plt.savefig("result/visualizations/top_suspicious_users.png", dpi=300, bbox_inches='tight')
         plt.close()
 
 if __name__ == "__main__":

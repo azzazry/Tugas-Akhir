@@ -32,8 +32,8 @@ class GraphSVXExplainer:
         
         return (importances / self.num_samples).cpu().numpy()
 
-def explain_user_anomalies():
-    data: HeteroData = torch.load('data/data_graph.pt')
+def explain_insider_predictions():
+    data: HeteroData = torch.load('data/data_graph.pt', weights_only=False)
     model = GraphSAGE(hidden_dim=64, out_dim=2, num_layers=2)
     model.load_state_dict(torch.load('result/logs/insider_threat_graphsage.pt'))
     model.eval()
@@ -74,4 +74,4 @@ def explain_user_anomalies():
     print("GraphSVX explanations tersimpan!")
 
 if __name__ == "__main__":
-    explain_user_anomalies()
+    explain_insider_predictions()

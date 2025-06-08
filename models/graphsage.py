@@ -4,15 +4,16 @@ import torch.nn.functional as F
 from torch_geometric.nn import HeteroConv, SAGEConv, Linear
 
 class GraphSAGE(nn.Module):
-    def __init__(self, hidden_dim=64, out_dim=2):
+    def __init__(self, hidden_dim=64, out_dim=2, num_layers=2):
         super().__init__()
+        self.num_layers = num_layers
         self.user = Linear(6, hidden_dim)
         self.pc = Linear(4, hidden_dim)
         self.url = Linear(3, hidden_dim)
         
         # Hetero GraphSAGE
         self.hetero_conv = HeteroConv({
-            ('user', 'self_loop', 'user'): SAGEConv(hidden_dim, hidden_dim),
+            ('user', 'interacts', 'user'): SAGEConv(hidden_dim, hidden_dim),
             ('user', 'uses', 'pc'): SAGEConv(hidden_dim, hidden_dim),
             ('user', 'visits', 'url'): SAGEConv(hidden_dim, hidden_dim)
         }, aggr='sum')
