@@ -3,15 +3,16 @@ import seaborn as sns
 import numpy as np
 import pickle
 from sklearn.metrics import roc_curve, auc
+import networkx as nx
 import pandas as pd
 
 def create_research_visualizations():
     print("Creating comprehensive visualizations...")
-    # Load evaluation results
+
     with open('result/logs/evaluation_results.pkl', 'rb') as f:
         eval_results = pickle.load(f)
     
-    # Set style untuk publikasi
+    # Set style
     plt.style.use('default')
     sns.set_palette("husl")
     
@@ -25,18 +26,18 @@ def create_research_visualizations():
     _plot_detailed_confusion_matrix(eval_results)
     # 5. Model Prediction Analysis
     _plot_prediction_analysis(eval_results)
+    # 6. Visualisasi struktur graph user-resource
+    _plot_sample_graph_structure()
+    # 7. Visualisasi top user yang paling sering diakses (berdasarkan interpretasi sederhana)
+    _plot_top_suspicious_users(eval_results)
     
     print("All visualizations saved to result/visualizations/")
 
 def _plot_training_overview(training_info):
     """Plot training curves dengan smoothing"""
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 6))
-    
     epochs = range(len(training_info['train_losses']))
-    
-    # Loss curve dengan smoothing
     ax1.plot(epochs, training_info['train_losses'], alpha=0.3, color='red', label='Raw Loss')
-    # Simple moving average untuk smoothing
     window = max(1, len(training_info['train_losses']) // 20)
     if len(training_info['train_losses']) > window:
         smooth_loss = pd.Series(training_info['train_losses']).rolling(window=window).mean()
@@ -244,5 +245,49 @@ def _plot_prediction_analysis(eval_results):
     plt.savefig('result/visualizations/prediction_analysis.png', dpi=300, bbox_inches='tight')
     plt.close()
     
+def _plot_sample_graph_structure():
+    G = nx.Graph()
+
+    user_nodes = [f"user_{i}" for i in range(5)]
+    resource_nodes = [f"res_{i}" for i in range(3)]
+
+    G.add_nodes_from(user_nodes, node_type='user')
+    G.add_nodes_from(resource_nodes, node_type='resource')
+
+    G.add_edge("user_0", "res_0")
+    G.add_edge("user_1", "res_1")
+    G.add_edge("user_2", "res_2")
+    G.add_edge("user_3", "res_0")
+
+    for user in user_nodes:
+        G.add_edge(user, user)
+
+    pos = nx.spring_layout(G, seed=42)
+    node_colors = ['skyblue' if G.nodes[n]['node_type'] == 'user' else 'lightgreen' for n in G.nodes]
+
+    plt.figure(figsize=(8, 6))
+    nx.draw(G, pos, with_labels=True, node_color=node_colors,
+            node_size=700, font_size=9, edge_color='gray')
+    plt.title("User-Resource Interaction Graph", fontsize=14, fontweight='bold')
+    plt.tight_layout()
+    plt.savefig("result/visualizations/sample_graph_structure.png", dpi=300)
+    plt.close()
+
+def _plot_top_suspicious_users(eval_results):
+    if 'val_probabilities' in eval_results and eval_results['val_probabilities'].shape[1] > 1:
+        insider_probs = eval_results['val_probabilities'][:, 1]
+        user_ids = np.arange(len(insider_probs))
+        top_users_idx = np.argsort(insider_probs)[-10:][::-1]  # Top 10
+
+        plt.figure(figsize=(10, 6))
+        sns.barplot(x=insider_probs[top_users_idx], y=[f"User {i}" for i in top_users_idx], palette="Reds_r")
+        plt.xlabel("Predicted Insider Probability")
+        plt.ylabel("User ID")
+        plt.title("Top 10 Suspicious Users Based on Prediction Probability", fontsize=14, fontweight='bold')
+        plt.xlim(0, 1)
+        plt.tight_layout()
+        plt.savefig("result/visualizations/top_suspicious_users.png", dpi=300)
+        plt.close()
+
 if __name__ == "__main__":
     create_research_visualizations()
