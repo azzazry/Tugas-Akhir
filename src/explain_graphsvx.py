@@ -91,8 +91,12 @@ def explain_insider_predictions():
 
     # Feature names untuk user
     feature_names = [
-        'total_logon_events', 'total_file_events', 'total_device_events',
-        'total_http_events', 'role_encoded', 'department_encoded'
+        'login_frequency',      # Feature 0: Seberapa sering login
+        'after_hours_activity', # Feature 1: Aktivitas di luar jam kerja  
+        'data_access_volume',   # Feature 2: Volume data yang diakses
+        'failed_logins',        # Feature 3: Jumlah gagal login
+        'privileged_access',    # Feature 4: Akses ke sistem sensitif
+        'behavioral_score'      # Feature 5: Skor anomali perilaku
     ]
 
     for idx in explain_indices:
@@ -158,12 +162,12 @@ def explain_insider_predictions():
 
 def interpret_feature(feat_name, value, importance):
     interpretations = {
-        'total_logon_events': f"Login rate: {value:.3f} (impact: {importance:.3f})",
-        'total_file_events': f"File activity: {value:.3f} (impact: {importance:.3f})",
-        'total_device_events': f"Device access: {value:.3f} (impact: {importance:.3f})",
-        'total_http_events': f"visits to url: {value:.3f} (impact: {importance:.3f})",
-        'role_encoded': f"url_encoded: {value:.3f} (impact: {importance:.3f})",
-        'department_encoded': f"departmenet_encoded: {value:.3f} (impact: {importance:.3f})"
+        'login_frequency': f"Login pattern: {value:.1f}/day (risk impact: {importance:.3f})",
+        'after_hours_activity': f"Off-hours access: {value:.1f}% (risk impact: {importance:.3f})",
+        'data_access_volume': f"Data access: {value:.1f}GB (risk impact: {importance:.3f})",
+        'failed_logins': f"Failed attempts: {value:.0f} (risk impact: {importance:.3f})",
+        'privileged_access': f"Admin access: {'Yes' if value > 0.5 else 'No'} (risk impact: {importance:.3f})",
+        'behavioral_score': f"Anomaly score: {value:.3f}/1.0 (risk impact: {importance:.3f})"
     }
     return interpretations.get(feat_name, f"Value: {value:.3f} (impact: {importance:.3f})")
 
