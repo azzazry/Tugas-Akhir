@@ -74,5 +74,5 @@ python src.visualization       # Visualisasi hasil
 
 ### Penulis
 Tugas Akhir oleh [Aaz Zazri Nugraha](https://github.com/azzazry)  
-Fakultas Teknik dan Teknologi Informasi, Universitas Jenderal Achmad Yani Yogyakarta (2025)  
+Universitas Jenderal Achmad Yani Yogyakarta (2025)  
 _Email: azzazry120@email.com_
