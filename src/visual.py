@@ -18,9 +18,12 @@ def create_research_visualizations():
     
     # Create output directory if not exists
     os.makedirs('result/visualizations', exist_ok=True)
-    # Load evaluation results
+    # Load evaluation dan explanation result
     with open('result/logs/evaluation_results.pkl', 'rb') as f:
         eval_results = pickle.load(f)
+    
+    with open('result/logs/graphsvx_explanations.pkl', 'rb') as f:
+        explanations = pickle.load(f)
     
     # Set style
     plt.style.use('default')
@@ -42,10 +45,10 @@ def create_research_visualizations():
     _plot_prediction_analysis(eval_results)
     
     # 6. GraphSVX Explanation Analysis
-    _plot_explanation_analysis()
+    _plot_explanation_analysis(explanations)
     
     # 7. Feature Importance dari GraphSVX
-    _plot_feature_importance_analysis()
+    _plot_feature_importance_analysis(explanations)
     
     # 8. User Risk Distribution
     _plot_user_risk_distribution(eval_results)

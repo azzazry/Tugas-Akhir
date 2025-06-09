@@ -6,13 +6,18 @@ def _plot_roc_pr_curves(eval_results):
     """Plot ROC dan Precision-Recall curves"""
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 6))
     
-    true_labels = eval_results['val_true_labels']
+    true_labels = eval_results.get('val_true_labels', np.array([]))
+    val_probabilities = eval_results.get('val_probabilities', None)
+
+    # Validasi data buat plot
+    valid_data = (
+        val_probabilities is not None and
+        val_probabilities.shape[1] > 1 and
+        len(np.unique(true_labels)) > 1
+    )
     
-    if ('val_probabilities' in eval_results and 
-        eval_results['val_probabilities'].shape[1] > 1 and 
-        len(np.unique(true_labels)) > 1):
-        
-        probs = eval_results['val_probabilities'][:, 1]
+    if valid_data:
+        probs = val_probabilities[:, 1]
         
         # ROC Curve
         fpr, tpr, _ = roc_curve(true_labels, probs)
@@ -30,7 +35,7 @@ def _plot_roc_pr_curves(eval_results):
         
         # Precision-Recall Curve
         precision, recall, _ = precision_recall_curve(true_labels, probs)
-        avg_precision = np.trapz(precision, recall)
+        avg_precision = np.trapz(precision, recall)  # Area under PR curve
         
         ax2.plot(recall, precision, color='blue', lw=2, label=f'PR curve (AP = {avg_precision:.3f})')
         ax2.set_xlabel('Recall')
@@ -42,10 +47,11 @@ def _plot_roc_pr_curves(eval_results):
         ax2.set_ylim([0.0, 1.05])
     else:
         for ax, title in zip([ax1, ax2], ['ROC Curve', 'Precision-Recall Curve']):
-            ax.text(0.5, 0.5, 'Curve not available\n(insufficient class diversity)', 
+            ax.text(0.5, 0.5, 'Curve not available\n(insufficient class diversity or probabilities)', 
                     ha='center', va='center', transform=ax.transAxes, fontsize=12)
             ax.set_title(title, fontweight='bold')
-    
+            ax.axis('off')
+
     plt.tight_layout()
     plt.savefig('result/visualizations/roc_pr_curves.png', dpi=300, bbox_inches='tight')
     plt.close()

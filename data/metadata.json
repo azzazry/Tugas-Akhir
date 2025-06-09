@@ -3,17 +3,17 @@
   "num_users": 1000,
   "num_pcs": 4298,
   "num_urls": 477,
-  "train_size": 800,
-  "val_size": 200,
+  "train_size": 900,
+  "val_size": 100,
   "insider_count": 2,
   "insiders": [
     {
-      "user_id": 0,
+      "user_id": "MBG3183",
       "role": "ElectricalEngineer",
       "department": "4 - Engineering"
     },
     {
-      "user_id": 1,
+      "user_id": "CMP2946",
       "role": "Salesman",
       "department": "2 - Sales"
     }
