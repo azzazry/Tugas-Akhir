@@ -5,5 +5,21 @@
   "num_urls": 477,
   "train_size": 800,
   "val_size": 200,
-  "insider_count": 2
+  "insider_count": 2,
+  "insiders": [
+    {
+      "user_id": 0,
+      "role": "ElectricalEngineer",
+      "department": "4 - Engineering"
+    },
+    {
+      "user_id": 1,
+      "role": "Salesman",
+      "department": "2 - Sales"
+    }
+  ],
+  "insider_indices": [
+    0,
+    1
+  ]
 }

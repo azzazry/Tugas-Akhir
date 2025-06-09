@@ -2,7 +2,7 @@ import torch
 from sklearn.metrics import accuracy_score, f1_score, classification_report, confusion_matrix, roc_auc_score
 import pickle
 import os
-from models.graphsage import GraphSAGE
+from model.graphsage import GraphSAGE
 
 def evaluate_insider_threat_model():
     data = torch.load('data/data_graph.pt', weights_only=False)

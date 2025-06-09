@@ -1,7 +1,7 @@
 import torch
 import torch.nn.functional as F
 import pickle
-from models.graphsage import GraphSAGE
+from model.graphsage import GraphSAGE
 
 class GraphSVXExplainer:
     def __init__(self, model, node_type='user', num_samples=20):
@@ -59,7 +59,6 @@ def explain_insider_predictions():
     expected_edges = [('user', 'uses', 'pc'), ('user', 'visits', 'url'), ('user', 'interacts', 'user')]
     edge_index_dict = {etype: data.edge_index_dict[etype] for etype in expected_edges if etype in data.edge_index_dict}
 
-    print("Running inference to detect insider users...")
     with torch.no_grad():
         out = model(x_dict, edge_index_dict)
         probs = F.softmax(out, dim=1)
@@ -98,13 +97,21 @@ def explain_insider_predictions():
         'privileged_access',    # Feature 4: Akses ke sistem sensitif
         'behavioral_score'      # Feature 5: Skor anomali perilaku
     ]
+    
+    with open('data/user_metadata.pkl', 'rb') as f:
+        user_meta = pickle.load(f)
 
     for idx in explain_indices:
         user_idx = idx.item()
         prob = probs[idx, 1].item()
         user_features = x_dict['user'][idx]
         
-        print(f"\nUser {user_idx} - Insider Probability: {prob:.3f}")
+        uid = user_meta[user_idx]['user_id']
+        role = user_meta[user_idx]['role']
+        dept = user_meta[user_idx]['department']
+
+        print(f"\nUser {uid} - Insider Probability: {prob:.3f}")
+        print(f"Role: {role}, Department: {dept}")
         
         # Klasifikasi risiko berdasarkan probabilitas
         if prob > 0.5:
@@ -121,7 +128,7 @@ def explain_insider_predictions():
         importance = explainer.explain(x_dict, edge_index_dict, user_idx)
         
         # Tampilkan top 3 features yang paling berpengaruh
-        top_indices = importance.argsort()[-3:][::-1]
+        top_indices = importance.argsort()[-10:][::-1]
         
         print("Key risk indicators:")
         for i, feat_idx in enumerate(top_indices):

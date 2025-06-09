@@ -3,7 +3,7 @@ import torch.nn.functional as F
 from torch.optim import Adam
 from sklearn.metrics import accuracy_score
 import pickle
-from models.graphsage import GraphSAGE
+from model.graphsage import GraphSAGE
 
 def train_insider_threat_model():
     # Load data graph, anggap sudah lengkap

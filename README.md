@@ -1,5 +1,5 @@
 # GNN Project: GraphSAGE & GraphSVX
-Proyek ini merupakan bagian dari tugas akhir sarjana pada bidang Teknologi Informasi. Implementasi ini berfokus pada pemanfaatan _Graph Neural Network_ (GNN) untuk mendeteksi anomali berbasis graf heterogen, serta memberikan penjelasan terhadap prediksi model menggunakan pendekatan GraphSVX. Inspirasi awal berasal dari repositori [GraphSVX](https://github.com/AlexDuvalinho/GraphSVX), dengan sejumlah penyesuaian untuk konteks keamanan siber.
+Proyek ini merupakan bagian dari tugas akhir sarjana pada bidang Teknologi Informasi. Implementasi ini berfokus pada pemanfaatan _Graph Neural Network_ (GNN) untuk mendeteksi anomali berbasis graf heterogen, serta memberikan penjelasan terhadap prediksi model menggunakan pendekatan GraphSVX. Inspirasi awal berasal dari repositori [github.com/AlexDuvalinho/GraphSVX)](https://github.com/AlexDuvalinho/GraphSVX), dengan sejumlah penyesuaian untuk konteks keamanan siber.
 
 ### Abstrak
 Anomali dalam sistem komputer, seperti perilaku insider threat, merupakan ancaman yang sulit dideteksi dengan pendekatan konvensional. _Graph Neural Network_ (GNN), khususnya GraphSAGE, menawarkan pendekatan yang efisien untuk memahami struktur relasi dalam data berbasis graf. Proyek ini mengembangkan sistem klasifikasi binary berbasis graph heterogen (user, PC, URL), disertai metode interpretabilitas menggunakan GraphSVX, agar hasil prediksi model dapat dipahami secara transparan oleh pengguna akhir.
@@ -68,8 +68,8 @@ python src.visualization       # Visualisasi hasil
 - matplotlib & seaborn – Untuk visualisasi eksploratif
 
 ### Referensi Ilmiah
-- Hamilton, W. et al. (2017). [*Inductive Representation Learning on Large Graphs* (GraphSAGE)](https://cs.stanford.edu/people/jure/pubs/graphsage-nips17.pdf).  
-- Duval, A. et al. (2021). [*GraphSVX: Shapley Value Explanations for Graph Neural Networks*](https://arxiv.org/pdf/2104.10482).  
+- Hamilton, W. dkk. (2017). [*Inductive Representation Learning on Large Graphs* (GraphSAGE)](https://cs.stanford.edu/people/jure/pubs/graphsage-nips17.pdf).  
+- Duval, A. dkk. (2021). [*GraphSVX: Shapley Value Explanations for Graph Neural Networks*](https://arxiv.org/pdf/2104.10482).  
 - CERT Carnegie Mellon. [*Insider Threat Dataset*](https://kilthub.cmu.edu/ndownloader/files/24844280)
 
 ### Penulis
