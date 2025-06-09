@@ -56,11 +56,6 @@ python src.evaluate            # Evaluasi model
 python src.explain             # Penjelasan interpretasi model
 python src.visual              # Visualisasi hasil
 ```
-6. Jalankan plots visual tertentu (opsional)
-```bash
-python src.plots.user_risk_distribution
-python src.plots.confusional_matrix
-```
 ### Output Utama
 1. `insider_threat_graphsage.pt` – File model hasil training
 2. `evaluation_results.pkl` – Ringkasan metrik evaluasi
