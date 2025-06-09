@@ -20,7 +20,7 @@ Anomali dalam sistem komputer, seperti perilaku insider threat, merupakan ancama
 
 ### Struktur Proyek
 ```bash
-data/                   # Dataset graph mentah & hasil preprocessing  
+data/                   # Dataset hasil preprocessing  
 models/                 # Checkpoint hasil training model  
 src/                    # Kode sumber (training, evaluasi, interpretasi, visualisasi)  
 main.py                 # Pipeline utama yang mengintegrasikan seluruh proses  
@@ -53,14 +53,14 @@ python main.py
 ```bash
 python src.train               # Melatih model
 python src.evaluate            # Evaluasi model
-python src.explain_graphsvx    # Penjelasan interpretasi model
-python src.visualization       # Visualisasi hasil
+python src.explain             # Penjelasan interpretasi model
+python src.visual              # Visualisasi hasil
 ```
 
 ### Output Utama
-`models/insider_threat_graphsage.pt` – File model hasil training</br>
-`result/evaluation_results.pkl` – Ringkasan metrik evaluasi</br>
-`result/graphsvx_explanations.pkl` – Hasil interpretasi dengan GraphSVX</br>
+`insider_threat_graphsage.pt` – File model hasil training</br>
+`evaluation_results.pkl` – Ringkasan metrik evaluasi</br>
+`graphsvx_explanations.pkl` – Hasil interpretasi dengan GraphSVX</br>
 
 ### Pustaka yang Digunakan
 - PyTorch & PyTorch Geometric – Untuk implementasi GraphSAGE

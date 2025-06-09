@@ -4,8 +4,8 @@ import traceback
 
 from src.train import train_insider_threat_model
 from src.evaluate import evaluate_insider_threat_model
-from src.explain_graphsvx import explain_insider_predictions
-from src.visualization import create_research_visualizations
+from explain import explain_insider_predictions
+from visual import create_research_visualizations
 
 def create_directories():
     os.makedirs('result/visualizations', exist_ok=True)
