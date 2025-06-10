@@ -5,10 +5,7 @@ from models.graphsage import GraphSAGE
 from models.graphsvx import GraphSVXExplainer
 
 def explain_insider_predictions():
-    """
-    Load data and trained GraphSAGE model,
-    identify high-risk users, and explain predictions with GraphSVX.
-    """
+    
     data = torch.load('data/data_graph.pt', weights_only=False)
     model = GraphSAGE(hidden_dim=64, out_dim=2, num_layers=2)
     model.load_state_dict(torch.load('result/logs/insider_threat_graphsage.pt'))

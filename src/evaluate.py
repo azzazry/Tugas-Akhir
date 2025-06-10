@@ -9,7 +9,6 @@ def evaluate_insider_threat_model():
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     data = torch.load('data/data_graph.pt', weights_only=False)
     
-    # Pastikan x_dict ada
     if not hasattr(data, 'x_dict'):
         data.x_dict = {
             'user': data['user'].x,

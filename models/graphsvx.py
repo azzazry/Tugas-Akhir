@@ -8,8 +8,7 @@ class GraphSVXExplainer:
         self.num_samples = num_samples
 
     def explain(self, x_dict, edge_index_dict, target_node_idx):
-        with torch.no_grad():  # Disable gradient computation
-            # Prediksi asli
+        with torch.no_grad():
             base_pred = self.model(x_dict, edge_index_dict)[target_node_idx]
             base_pred = F.softmax(base_pred, dim=0)
             

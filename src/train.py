@@ -1,5 +1,4 @@
 import torch
-import torch.nn.functional as F
 from torch.optim import Adam
 from torch.nn import CrossEntropyLoss
 from sklearn.metrics import accuracy_score
