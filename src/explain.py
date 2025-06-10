@@ -77,11 +77,11 @@ def explain_insider_predictions():
         print(f"Role: {role}, Department: {dept}")
 
         if prob > 0.5:
-            risk_class = "HIGH RISK"
+            risk_class = "Resiko Tinggi"
         elif prob > 0.3:
-            risk_class = "MEDIUM RISK"
+            risk_class = "Resiko Sedang"
         else:
-            risk_class = "LOW RISK (Top Candidate)"
+            risk_class = "Resiko Rendah (Top Candidate)"
 
         print(f"Risk Classification: {risk_class}")
         print("-" * 40)
