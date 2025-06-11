@@ -35,7 +35,7 @@ def _plot_roc_pr_curves(eval_results):
         
         # Precision-Recall Curve
         precision, recall, _ = precision_recall_curve(true_labels, probs)
-        avg_precision = np.trapz(precision, recall)  # Area under PR curve
+        avg_precision = np.trapz(precision, recall)
         
         ax2.plot(recall, precision, color='blue', lw=2, label=f'PR curve (AP = {avg_precision:.3f})')
         ax2.set_xlabel('Recall')

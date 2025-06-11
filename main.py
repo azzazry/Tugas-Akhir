@@ -9,6 +9,7 @@ from src.visual import create_research_visualizations
 def create_directories():
     os.makedirs('result/visualizations', exist_ok=True)
     os.makedirs('result/logs', exist_ok=True)
+    os.makedirs('result/data', exist_ok=True)
 
 def run_pipeline():
     try:

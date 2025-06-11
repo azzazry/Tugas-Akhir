@@ -14,29 +14,36 @@ def train_insider_threat_model():
             'pc': data['pc'].x,
             'url': data['url'].x
         }
-    
+
     model = GraphSAGE(hidden_dim=64, out_dim=2, num_layers=2).to(device)
     optimizer = Adam(model.parameters(), lr=0.01, weight_decay=5e-4)
 
-    # Hitung class weights manual, sesuaikan dengan distribusi kelas
     labels = data['user'].y.to(device)
     classes, counts = torch.unique(labels, return_counts=True)
     class_weights = torch.zeros(2).to(device)
     for cls, cnt in zip(classes, counts):
         class_weights[cls] = 1.0 / cnt.float()
-    class_weights = class_weights / class_weights.sum() * 2  # Normalisasi agar total 2
+    class_weights = class_weights / class_weights.sum() * 2
     criterion = CrossEntropyLoss(weight=class_weights)
 
     model.train()
     train_losses = []
     train_accs = []
     epochs = 100
-
     edge_index_dict = data.edge_index_dict
 
-    # pindahin data ke device
     for key in data.x_dict:
         data.x_dict[key] = data.x_dict[key].to(device)
+
+    # Inisialisasi log training
+    log_lines = []
+    log_lines.append("[2] Training model Insider Threat GraphSAGE...")
+    log_lines.append("+--------+----------+----------+")
+    log_lines.append("| Epoch  |  Loss    | Accuracy |")
+    log_lines.append("+--------+----------+----------+")
+    print(log_lines[-3])
+    print(log_lines[-2])
+    print(log_lines[-1])
 
     for epoch in range(epochs):
         optimizer.zero_grad()
@@ -52,10 +59,15 @@ def train_insider_threat_model():
         train_losses.append(loss.item())
         train_accs.append(acc)
 
-        if epoch % 20 == 0:
-            print(f"Epoch {epoch:03d} | Loss: {loss.item():.4f} | Acc: {acc:.4f}")
+        if epoch % 10 == 0:
+            log_line = f"|  {epoch:03d}   |  {loss.item():<8.4f}|  {acc:<8.4f}|"
+            print(log_line)
+            log_lines.append(log_line)
 
-    torch.save(model.state_dict(), 'result/logs/insider_threat_graphsage.pt')
+    log_lines.append("+--------+----------+----------+")
+    print(log_lines[-1])
+
+    torch.save(model.state_dict(), 'result/data/insider_threat_graphsage.pt')
     training_info = {
         'train_losses': train_losses,
         'train_accs': train_accs,
@@ -64,9 +76,19 @@ def train_insider_threat_model():
         'final_acc': train_accs[-1],
         'class_weights': class_weights.cpu().tolist(),
     }
-    with open('result/logs/training_info.pkl', 'wb') as f:
+    with open('result/data/training_info.pkl', 'wb') as f:
         pickle.dump(training_info, f)
 
-    print(f"Training selesai. Final loss: {train_losses[-1]:.4f}, Final acc: {train_accs[-1]:.4f}")
-    print(f"Class weights used: {training_info['class_weights']}")
+    # Tambah info akhir ke log
+    log_lines.append(f"Training selesai.\nFinal loss: {train_losses[-1]:.4f}, Final acc: {train_accs[-1]:.4f}")
+    log_lines.append(f"Class weights used: {training_info['class_weights']}")
+
+    # Simpan log ke file
+    with open("result/logs/training_log.txt", "w") as f:
+        for line in log_lines:
+            f.write(line + "\n")
+
+    print(log_lines[-2])
+    print(log_lines[-1])
+
     return model, training_info

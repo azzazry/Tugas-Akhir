@@ -6,7 +6,7 @@ def _plot_training_overview(training_info):
     epochs = range(len(training_info['train_losses']))
 
     # Loss curve
-    ax1.plot(epochs, training_info['train_losses'], color='red', linewidth=2, alpha=0.8)
+    ax1.plot(epochs, training_info['train_losses'], color='red', linewidth=2)
     ax1.set_title('Training Loss Over Time', fontsize=14, fontweight='bold')
     ax1.set_xlabel('Epoch')
     ax1.set_ylabel('Cross-Entropy Loss')
@@ -14,7 +14,7 @@ def _plot_training_overview(training_info):
     final_loss = training_info.get('final_loss', None)
     if final_loss is not None:
         ax1.text(0.7, 0.9, f'Final Loss: {final_loss:.4f}', 
-                 transform=ax1.transAxes, bbox=dict(boxstyle='round', facecolor='white', alpha=0.8))
+                 transform=ax1.transAxes, bbox=dict(boxstyle='round', facecolor='white'))
 
     # Accuracy curve
     ax2.plot(epochs, training_info['train_accs'], color='blue', linewidth=2)
@@ -26,7 +26,7 @@ def _plot_training_overview(training_info):
     final_acc = training_info.get('final_acc', None)
     if final_acc is not None:
         ax2.text(0.7, 0.1, f'Final Acc: {final_acc:.4f}', 
-                 transform=ax2.transAxes, bbox=dict(boxstyle='round', facecolor='white', alpha=0.8))
+                 transform=ax2.transAxes, bbox=dict(boxstyle='round', facecolor='white'))
 
     # Optional: tampilkan class weights jika ada
     class_weights = training_info.get('class_weights', None)
