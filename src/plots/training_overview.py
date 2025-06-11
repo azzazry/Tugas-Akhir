@@ -28,12 +28,6 @@ def _plot_training_overview(training_info):
         ax2.text(0.7, 0.1, f'Final Acc: {final_acc:.4f}', 
                  transform=ax2.transAxes, bbox=dict(boxstyle='round', facecolor='white'))
 
-    # Optional: tampilkan class weights jika ada
-    class_weights = training_info.get('class_weights', None)
-    if class_weights:
-        weight_text = f"Class weights: {class_weights}"
-        fig.suptitle(weight_text, fontsize=10, y=1.02, color='gray')
-
     plt.tight_layout()
     plt.savefig('result/visualizations/training_overview.png', dpi=300, bbox_inches='tight')
     plt.close()

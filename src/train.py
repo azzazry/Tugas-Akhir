@@ -80,7 +80,8 @@ def train_insider_threat_model():
         pickle.dump(training_info, f)
 
     # Tambah info akhir ke log
-    log_lines.append(f"Training selesai.\nFinal loss: {train_losses[-1]:.4f}, Final acc: {train_accs[-1]:.4f}")
+    log_lines.append(f"Final loss: {train_losses[-1]:.4f}, Final acc: {train_accs[-1]:.4f}")
+    log_lines.append(f"Training selesai.")
     log_lines.append(f"Class weights used: {training_info['class_weights']}")
 
     # Simpan log ke file

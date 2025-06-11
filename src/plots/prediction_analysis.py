@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 def _plot_prediction_analysis(eval_results):
-    """Analisis prediksi model yang lebih detail"""
+
     true_labels = eval_results.get('val_true_labels')
     pred_labels = eval_results.get('val_predictions')
 

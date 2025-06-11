@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 def _plot_performance_dashboard(eval_results):
-    """Dashboard performa model sesuai struktur data"""
+
     fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(15, 12))
     
     # Ambil data dengan fallback default supaya gak error

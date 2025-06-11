@@ -1,7 +1,5 @@
 import pickle
 import os
-import warnings
-warnings.filterwarnings('ignore')
 
 from src.plots.training_overview import _plot_training_overview
 from src.plots.performance_dashboard import _plot_performance_dashboard
@@ -10,12 +8,13 @@ from src.plots.confusion_matrix import _plot_detailed_confusion_matrix
 from src.plots.prediction_analysis import _plot_prediction_analysis
 from src.plots.explanation_analysis import _plot_explanation_analysis
 from src.plots.feature_analysis import _plot_feature_importance_analysis
-from src.plots.user_risk_distribution import _plot_user_risk_distribution
+from src.plots.user_risk_explanation import _plot_user_risk_explanations
 
 def create_research_visualizations():
     
     # Create output directory if not exists
     os.makedirs('result/visualizations', exist_ok=True)
+    
     # Load evaluation dan explanation result
     with open('result/data/evaluation_results.pkl', 'rb') as f:
         eval_results = pickle.load(f)
@@ -52,8 +51,8 @@ def create_research_visualizations():
     print('7. feature importance analysis')
     
     # 8. User Risk Distribution
-    _plot_user_risk_distribution(eval_results)
-    print('9. user risk distribution')
+    _plot_user_risk_explanations(explanations)
+    print('8. user risk distribution')
     
     print("Semua visualisasi tersimpan di result/visualizations/")
 

@@ -4,7 +4,6 @@ import numpy as np
 from matplotlib.colors import LinearSegmentedColormap
 
 def _plot_detailed_confusion_matrix(eval_results):
-    """Plot confusion matrix yang detailed dengan style menarik"""
     cm = eval_results.get('confusion_matrix', None)
     if cm is None:
         print("Confusion matrix tidak ditemukan di eval_results.")

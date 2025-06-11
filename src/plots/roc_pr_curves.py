@@ -3,7 +3,7 @@ import numpy as np
 from sklearn.metrics import roc_curve, auc, precision_recall_curve
 
 def _plot_roc_pr_curves(eval_results):
-    """Plot ROC dan Precision-Recall curves"""
+
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 6))
     
     true_labels = eval_results.get('val_true_labels', np.array([]))
