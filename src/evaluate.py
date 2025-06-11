@@ -112,7 +112,7 @@ def evaluate_insider_threat_model():
         pickle.dump(eval_results, f)
 
     # Simpan log ke file
-    log_path = 'result/logs/evaluation_log.txt'
+    log_path = 'result/logs/evaluation_log.log'
     with open(log_path, 'w') as f:
         for line in log_lines:
             f.write(line + '\n')

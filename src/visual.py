@@ -11,14 +11,10 @@ from src.plots.feature_analysis import _plot_feature_importance_analysis
 from src.plots.user_risk_explanation import _plot_user_risk_explanations
 
 def create_research_visualizations():
-    
-    # Create output directory if not exists
+
     os.makedirs('result/visualizations', exist_ok=True)
-    
-    # Load evaluation dan explanation result
     with open('result/data/evaluation_results.pkl', 'rb') as f:
         eval_results = pickle.load(f)
-    
     with open('result/data/graphsvx_explanations.pkl', 'rb') as f:
         explanations = pickle.load(f)
     

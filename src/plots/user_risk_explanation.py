@@ -38,7 +38,7 @@ def _plot_user_risk_explanations(explanations):
 
     for bar, count in zip(bars, counts):
         if count > 0:
-            ax1.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 0.3,
+            ax1.text(bar.get_x() + bar.get_width() / 2, bar.get_height(),
                      str(count), ha='center', va='bottom', fontweight='bold')
 
     # Plot kanan: Top N user paling mencurigakan

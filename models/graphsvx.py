@@ -17,19 +17,16 @@ class GraphSVXExplainer:
             
             importances = torch.zeros(num_feats)
             for i in range(self.num_samples):
-                # Mask random features
+
                 mask = torch.bernoulli(torch.full_like(x_orig, 0.5))
                 x_masked = x_orig * mask
-                
-                # Copy x_dict dan ganti target node
+
                 x_dict_mod = {k: v.clone() for k, v in x_dict.items()}
                 x_dict_mod[self.node_type][target_node_idx] = x_masked
                 
-                # Prediksi dengan features yang dimasking
                 pred = self.model(x_dict_mod, edge_index_dict)[target_node_idx]
                 pred = F.softmax(pred, dim=0)
                 
-                # Hitung selisih prediksi (fokus pada class insider = 1)
                 delta = base_pred - pred
                 importances += torch.abs(delta[1]) * mask
             

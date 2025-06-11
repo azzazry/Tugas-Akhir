@@ -37,7 +37,6 @@ def train_insider_threat_model():
 
     # Inisialisasi log training
     log_lines = []
-    log_lines.append("[2] Training model Insider Threat GraphSAGE...")
     log_lines.append("+--------+----------+----------+")
     log_lines.append("| Epoch  |  Loss    | Accuracy |")
     log_lines.append("+--------+----------+----------+")
@@ -85,7 +84,7 @@ def train_insider_threat_model():
     log_lines.append(f"Class weights used: {training_info['class_weights']}")
 
     # Simpan log ke file
-    with open("result/logs/training_log.txt", "w") as f:
+    with open("result/logs/training_log.log", "w") as f:
         for line in log_lines:
             f.write(line + "\n")
 

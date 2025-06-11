@@ -8,8 +8,7 @@ class GraphSAGE(nn.Module):
         self.user = Linear(6, hidden_dim)
         self.pc = Linear(4, hidden_dim)
         self.url = Linear(3, hidden_dim)
-        
-        # Hetero GraphSAGE
+
         self.hetero_conv = HeteroConv({
             ('user', 'interacts', 'user'): SAGEConv(hidden_dim, hidden_dim),
             ('user', 'uses', 'pc'): SAGEConv(hidden_dim, hidden_dim),

@@ -148,7 +148,7 @@ def explain_insider_predictions():
     log_line(f"- Max insider probability: {probs[:, 1].max():.3f}")
     log_line(f"- Average insider probability: {probs[:, 1].mean():.3f}")
 
-    with open("result/logs/explanation_log.txt", "w", encoding="utf-8") as f:
+    with open("result/logs/explanation_log.log", "w", encoding="utf-8") as f:
         for line in log_lines:
             clean_line = line.replace(RED, "").replace(YELLOW, "").replace(GREEN, "").replace(RESET, "")
             f.write(clean_line + "\n")

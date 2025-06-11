@@ -10,12 +10,12 @@
     {
       "user_id": "MBG3183",
       "role": "ElectricalEngineer",
-      "department": "4 - Engineering"
+      "department": "Engineering"
     },
     {
       "user_id": "CMP2946",
       "role": "Salesman",
-      "department": "2 - Sales"
+      "department": "Sales"
     }
   ],
   "insider_indices": [
