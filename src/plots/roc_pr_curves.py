@@ -29,7 +29,7 @@ def _plot_roc_pr_curves(eval_results):
         ax1.set_ylim([0.0, 1.05])
         ax1.set_xlabel('False Positive Rate')
         ax1.set_ylabel('True Positive Rate')
-        ax1.set_title('ROC Curve - Insider Threat Detection', fontweight='bold')
+        ax1.set_title('ROC Curve', fontweight='bold')
         ax1.legend(loc="lower right")
         ax1.grid(True, alpha=0.3)
         

@@ -1,14 +1,9 @@
 import matplotlib.pyplot as plt
 import numpy as np
+from src.explain import get_feature_names
 
 def _plot_feature_importance_analysis(explanations):
-    feature_names = [
-        'Total Logon Events', 'Total File Events', 'Total Device Events', 'Total HTTP Events',
-        'Encoded Role', 'Encoded Department', 'Logon Count', 'After Hours Logon', 'Weekend Logon',
-        'File Open Count', 'File Write Count', 'File Copy Count', 'File Delete Count',
-        'Device Connect Count', 'Device Disconnect Count', 'Visit Frequency', 'Unique Visit Days',
-        'After Hours Browsing', 'Cloud Service Visits', 'Job Site Visits'
-    ]
+    feature_names = get_feature_names()
 
     feature_importance_sum = np.zeros(len(feature_names))
     feature_importance_counts = np.zeros(len(feature_names))

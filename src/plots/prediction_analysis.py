@@ -5,20 +5,14 @@ def _plot_prediction_analysis(eval_results):
 
     true_labels = eval_results.get('val_true_labels')
     pred_labels = eval_results.get('val_predictions')
-
-    if true_labels is None or pred_labels is None:
-        print("True labels atau prediksi tidak ditemukan di eval_results.")
-        return
     
-    # Hitung kategori prediksi
     correct_normal = np.sum((true_labels == 0) & (pred_labels == 0))
     correct_insider = np.sum((true_labels == 1) & (pred_labels == 1))
     false_positive = np.sum((true_labels == 0) & (pred_labels == 1))
     false_negative = np.sum((true_labels == 1) & (pred_labels == 0))
     
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 6))
-    
-    # Bar chart breakdown
+
     categories = ['True\nNormal', 'True\nInsider', 'False\nPositive', 'False\nNegative']
     values = [correct_normal, correct_insider, false_positive, false_negative]
     colors = ['green', 'darkgreen', 'orange', 'red']
@@ -40,7 +34,7 @@ def _plot_prediction_analysis(eval_results):
         sizes = values
         labels = ['Correct Normal', 'Correct Insider', 'False Positive', 'False Negative']
         colors_pie = ['lightgreen', 'darkgreen', 'orange', 'red']
-        explode = (0, 0, 0.1, 0.1)  # Sorot error
+        explode = (0, 0, 0.1, 0.1)
         
         ax2.pie(sizes, labels=labels, colors=colors_pie, autopct='%1.1f%%', 
                 startangle=90, explode=explode, textprops={'fontsize': 11})

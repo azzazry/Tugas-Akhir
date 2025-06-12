@@ -35,7 +35,6 @@ def train_insider_threat_model():
     for key in data.x_dict:
         data.x_dict[key] = data.x_dict[key].to(device)
 
-    # Inisialisasi log training
     log_lines = []
     log_lines.append("+--------+----------+----------+")
     log_lines.append("| Epoch  |  Loss    | Accuracy |")
@@ -78,12 +77,9 @@ def train_insider_threat_model():
     with open('result/data/training_info.pkl', 'wb') as f:
         pickle.dump(training_info, f)
 
-    # Tambah info akhir ke log
     log_lines.append(f"Final loss: {train_losses[-1]:.4f}, Final acc: {train_accs[-1]:.4f}")
-    log_lines.append(f"Training selesai.")
     log_lines.append(f"Class weights used: {training_info['class_weights']}")
 
-    # Simpan log ke file
     with open("result/logs/training_log.log", "w") as f:
         for line in log_lines:
             f.write(line + "\n")
@@ -92,3 +88,6 @@ def train_insider_threat_model():
     print(log_lines[-1])
 
     return model, training_info
+
+if __name__ == '__main__':
+    train_insider_threat_model()

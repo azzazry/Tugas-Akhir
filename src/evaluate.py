@@ -56,8 +56,6 @@ def evaluate_insider_threat_model():
             val_auc = float('nan')
 
     log_lines.append(f"Best Threshold: {best_thresh:.2f}")
-    log_lines.append(f"Validation Accuracy: {val_acc:.4f}")
-    log_lines.append(f"F1-Score: {val_f1:.4f}")
     log_lines.append(f"AUC: {val_auc:.4f}")
 
     print("\n".join(log_lines))

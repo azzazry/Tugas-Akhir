@@ -4,7 +4,6 @@ import pickle
 from models.graphsage import GraphSAGE
 from models.graphsvx import GraphSVXExplainer
 
-# ANSI warna untuk terminal
 RED = "\033[91m"
 YELLOW = "\033[93m"
 GREEN = "\033[92m"
@@ -15,7 +14,46 @@ log_lines = []
 def log_line(line):
     print(line, flush=True)
     log_lines.append(line)
+    
+def get_feature_names():
+    return [
+        'Total Logon Events', 
+        'Total File Events', 
+        'Total Device Events', 
+        'Total HTTP Events',
+        'Logon Count', 
+        'After Hours Logon', 
+        'Weekend Logon',
+        'File Open Count', 
+        'File Write Count', 
+        'File Copy Count', 
+        'File Delete Count',
+        'Device Connect Count', 
+        'Device Disconnect Count', 
+        'Visit Frequency', 
+        'Unique Visit Days',
+        'After Hours Browsing', 
+        'Cloud Service Visits', 
+        'Job Site Visits'
+    ]
 
+def get_risk_classification(prob):
+    if prob > 0.7:
+        return "Resiko Tinggi"
+    elif prob > 0.4:
+        return "Resiko Sedang"
+    else:
+        return "Resiko Rendah (Top Candidate)"
+
+def get_recommendation(prob):
+    classification = get_risk_classification(prob)
+    if classification == "Resiko Tinggi":
+        return "Segera lakukan investigasi mendalam dan monitoring aktif."
+    elif classification == "Resiko Sedang":
+        return "Perketat pengawasan dan audit aktivitas pengguna."
+    else:
+        return "Monitor secara rutin dan lakukan edukasi keamanan."
+    
 def explain_insider_predictions():
     data = torch.load('data/data_graph.pt', weights_only=False)
     model = GraphSAGE(hidden_dim=64, out_dim=2, num_layers=2)
@@ -43,17 +81,12 @@ def explain_insider_predictions():
         probs = F.softmax(out, dim=1)
         insider_candidates = (probs[:, 1] > best_threshold).nonzero(as_tuple=True)[0]
 
-        log_line(f"Using threshold {best_threshold:.2f}, users with insider probability > threshold: {len(insider_candidates)}")
         if len(insider_candidates) == 0:
             top_probs, top_indices = torch.topk(probs[:, 1], k=min(2, len(probs)))
             insider_candidates = top_indices
             log_line("No users meet the threshold. Taking top 2 highest probabilities...")
             log_line(f"Top 2 insider probabilities: {[round(p.item(), 3) for p in top_probs]}")
-
-
         insider_probs = probs[insider_candidates, 1]
-
-    log_line(f"Analyzing {len(insider_candidates)} users with highest insider risk...")
 
     sorted_indices = torch.argsort(insider_probs, descending=True)
     explain_indices = insider_candidates[sorted_indices[:5]]
@@ -61,13 +94,7 @@ def explain_insider_predictions():
     explainer = GraphSVXExplainer(model=model, node_type='user', num_samples=30)
     explanations = {}
 
-    feature_names = [
-        'Total Logon Events', 'Total File Events', 'Total Device Events', 'Total HTTP Events',
-        'Encoded Role', 'Encoded Department', 'Logon Count', 'After Hours Logon', 'Weekend Logon',
-        'File Open Count', 'File Write Count', 'File Copy Count', 'File Delete Count',
-        'Device Connect Count', 'Device Disconnect Count', 'Visit Frequency', 'Unique Visit Days',
-        'After Hours Browsing', 'Cloud Service Visits', 'Job Site Visits'
-    ]
+    feature_names = get_feature_names()
 
     with open('data/user_metadata.pkl', 'rb') as f:
         user_meta = pickle.load(f)
@@ -76,6 +103,7 @@ def explain_insider_predictions():
         user_idx = idx.item()
         prob = probs[user_idx, 1].item()
         user_features = x_dict['user'][user_idx]
+        risk_class = get_risk_classification(prob)
 
         uid = user_meta[user_idx]['user_id']
         role = user_meta[user_idx]['role']
@@ -83,14 +111,6 @@ def explain_insider_predictions():
 
         log_line(f"\nUser {uid} - Insider Probability: {prob:.3f}")
         log_line(f"Role: {role}, Department: {dept}")
-
-        if prob > 0.7:
-            risk_class = "Resiko Tinggi"
-        elif prob > 0.4:
-            risk_class = "Resiko Sedang"
-        else:
-            risk_class = "Resiko Rendah (Top Candidate)"
-
         log_line(f"Risk Classification: {risk_class}")
 
         importance = explainer.explain(x_dict, edge_index_dict, user_idx)
@@ -132,7 +152,6 @@ def explain_insider_predictions():
             'role': role,
             'department': dept,
             'importance_scores': importance.tolist(),
-            'importance_scores': importance.tolist(),
             'probability': prob,
             'risk_classification': risk_class,
             'top_features': [(feature_names[i] if i < len(feature_names) else f"feature_{i}", 
@@ -144,6 +163,7 @@ def explain_insider_predictions():
 
     log_line(f"\nKesimpulan:")
     log_line(f"- Total users analyzed: {len(x_dict['user'])}")
+    log_line(f"- Using threshold: {best_threshold:.2f}")
     log_line(f"- Users meeting threshold (>{best_threshold}): {len(insider_candidates)}")
     log_line(f"- Max insider probability: {probs[:, 1].max():.3f}")
     log_line(f"- Average insider probability: {probs[:, 1].mean():.3f}")
@@ -152,14 +172,6 @@ def explain_insider_predictions():
         for line in log_lines:
             clean_line = line.replace(RED, "").replace(YELLOW, "").replace(GREEN, "").replace(RESET, "")
             f.write(clean_line + "\n")
-
-def get_recommendation(prob):
-    if prob > 0.7:
-        return "Segera lakukan investigasi mendalam dan monitoring aktif."
-    elif prob > 0.4:
-        return "Perketat pengawasan dan audit aktivitas pengguna."
-    else:
-        return "Monitor secara rutin dan lakukan edukasi keamanan."
 
 if __name__ == "__main__":
     explain_insider_predictions()
