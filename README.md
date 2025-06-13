@@ -37,7 +37,6 @@ python -m venv env
 ```bash
 # Windows
 env\Scripts\activate
-
 # Linux/macOS
 source env/bin/activate
 ```
@@ -49,7 +48,12 @@ pip install -r requirements.txt
 ```bash
 python main.py
 ```
-5. Jalankan bagian tertentu (opsional)
+5. Jalankan pipeline utama dengan jumlah users (default: 1000)
+```bash
+python main.py --users 1000    # Untuk 1000 user
+python main.py --users 1500    # Untuk 1500 user
+```
+6. Jalankan bagian tertentu (opsional)
 ```bash
 python src.train               # Melatih model
 python src.evaluate            # Evaluasi model

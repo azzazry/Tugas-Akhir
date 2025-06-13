@@ -4,12 +4,15 @@ import pickle
 import os
 import numpy as np
 from models.graphsage import GraphSAGE
+from src.utils.config import get_paths
 
-def evaluate_insider_threat_model():
+def evaluate_insider_threat_model(users='1000'):
+    paths = get_paths(users)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     log_lines = []
 
-    data = torch.load('data/data_graph.pt', weights_only=False)
+    # Load data graph
+    data = torch.load(paths['data_graph_path'], weights_only=False)
     if not hasattr(data, 'x_dict'):
         data.x_dict = {
             'user': data['user'].x,
@@ -17,8 +20,9 @@ def evaluate_insider_threat_model():
             'url': data['url'].x
         }
 
+    # Load model
     model = GraphSAGE(hidden_dim=64, out_dim=2, num_layers=2).to(device)
-    model.load_state_dict(torch.load('result/data/insider_threat_graphsage.pt', map_location=device))
+    model.load_state_dict(torch.load(paths['model_path'], map_location=device))
     model.eval()
 
     expected_edges = [('user', 'uses', 'pc'), ('user', 'visits', 'url'), ('user', 'interacts', 'user')]
@@ -35,6 +39,7 @@ def evaluate_insider_threat_model():
         val_labels = data['user'].y[val_mask].to(device)
         val_probs = torch.softmax(val_out, dim=1)
 
+        # Cari threshold terbaik berdasarkan F1
         thresholds = np.arange(0, 1.05, 0.05)
         best_f1 = 0
         best_thresh = 0.5
@@ -47,7 +52,6 @@ def evaluate_insider_threat_model():
                 best_thresh = t
 
         val_pred = (val_probs[:, 1] > best_thresh).long()
-
         val_acc = accuracy_score(val_labels.cpu(), val_pred.cpu())
         val_f1 = f1_score(val_labels.cpu(), val_pred.cpu(), zero_division=0)
         try:
@@ -71,8 +75,9 @@ def evaluate_insider_threat_model():
     print("\nClassification Report:")
     print(class_report)
 
+    # Load metadata user
     try:
-        with open('data/user_metadata.pkl', 'rb') as f:
+        with open(paths['user_metadata_path'], 'rb') as f:
             user_meta = pickle.load(f)
     except Exception as e:
         err_msg = f"Gagal load user metadata: {e}"
@@ -81,11 +86,11 @@ def evaluate_insider_threat_model():
         user_meta = None
 
     training_info = {}
-    training_info_path = 'result/data/training_info.pkl'
-    if os.path.exists(training_info_path):
-        with open(training_info_path, 'rb') as f:
+    if os.path.exists(paths['training_info_path']):
+        with open(paths['training_info_path'], 'rb') as f:
             training_info = pickle.load(f)
 
+    # Kumpulkan hasil evaluasi
     eval_results = {
         'val_accuracy': val_acc,
         'val_f1_score': val_f1,
@@ -106,16 +111,16 @@ def evaluate_insider_threat_model():
         'user_metadata': user_meta
     }
 
-    with open('result/data/evaluation_results.pkl', 'wb') as f:
+    # Simpan hasil evaluasi
+    with open(paths['evaluation_path'], 'wb') as f:
         pickle.dump(eval_results, f)
 
-    # Simpan log ke file
-    log_path = 'result/logs/evaluation_log.log'
-    with open(log_path, 'w') as f:
+    # Simpan log evaluasi
+    with open(paths['eval_log_path'], 'w') as f:
         for line in log_lines:
             f.write(line + '\n')
 
-    print("Evaluasi selesai! Log disimpan ke", log_path)
+    print("Evaluasi selesai! Log disimpan ke", paths['eval_log_path'])
     return eval_results
 
 if __name__ == "__main__":

@@ -4,10 +4,13 @@ from torch.nn import CrossEntropyLoss
 from sklearn.metrics import accuracy_score
 import pickle
 from models.graphsage import GraphSAGE
+from src.utils.config import get_paths
 
-def train_insider_threat_model():
+def train_insider_threat_model(users='1000'):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    data = torch.load('data/data_graph.pt', weights_only=False)
+    paths = get_paths(users)
+
+    data = torch.load(paths["data_graph_path"], weights_only=False)
     if not hasattr(data, 'x_dict'):
         data.x_dict = {
             'user': data['user'].x,
@@ -65,7 +68,8 @@ def train_insider_threat_model():
     log_lines.append("+--------+----------+----------+")
     print(log_lines[-1])
 
-    torch.save(model.state_dict(), 'result/data/insider_threat_graphsage.pt')
+    # Save model & training info
+    torch.save(model.state_dict(), paths["model_path"])
     training_info = {
         'train_losses': train_losses,
         'train_accs': train_accs,
@@ -74,13 +78,13 @@ def train_insider_threat_model():
         'final_acc': train_accs[-1],
         'class_weights': class_weights.cpu().tolist(),
     }
-    with open('result/data/training_info.pkl', 'wb') as f:
+    with open(paths["training_info_path"], 'wb') as f:
         pickle.dump(training_info, f)
 
     log_lines.append(f"Final loss: {train_losses[-1]:.4f}, Final acc: {train_accs[-1]:.4f}")
     log_lines.append(f"Class weights used: {training_info['class_weights']}")
 
-    with open("result/logs/training_log.log", "w") as f:
+    with open(paths["log_file"], "w") as f:
         for line in log_lines:
             f.write(line + "\n")
 
@@ -90,4 +94,4 @@ def train_insider_threat_model():
     return model, training_info
 
 if __name__ == '__main__':
-    train_insider_threat_model()
+    train_insider_threat_model('1000')  # Default
