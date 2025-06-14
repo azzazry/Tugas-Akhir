@@ -2,7 +2,7 @@
 Proyek ini merupakan bagian dari tugas akhir sarjana pada bidang Teknologi Informasi. Implementasi ini berfokus pada pemanfaatan _Graph Neural Network_ (GNN) untuk mendeteksi anomali berbasis graf heterogen, serta memberikan penjelasan terhadap prediksi model menggunakan pendekatan GraphSVX. Inspirasi awal berasal dari repositori [https://github.com/AlexDuvalinho/GraphSVX](https://github.com/AlexDuvalinho/GraphSVX), dengan sejumlah penyesuaian untuk konteks keamanan siber.
 
 ### Abstrak
-Anomali dalam sistem komputer, seperti perilaku insider threat, merupakan ancaman yang sulit dideteksi dengan pendekatan konvensional. _Graph Neural Network_ (GNN), khususnya GraphSAGE, menawarkan pendekatan yang efisien untuk memahami struktur relasi dalam data berbasis graf. Proyek ini mengembangkan sistem klasifikasi binary berbasis graph heterogen (`user`, `pc`, `url`), disertai metode interpretabilitas menggunakan GraphSVX, agar hasil prediksi model dapat dipahami secara transparan oleh pengguna akhir.
+Anomali dalam sistem komputer, seperti perilaku _insider threat_, merupakan ancaman yang sulit dideteksi dengan pendekatan konvensional. _Graph Neural Network_ (GNN), khususnya GraphSAGE, menawarkan pendekatan yang efisien untuk memahami struktur relasi dalam data berbasis graf. Proyek ini mengembangkan sistem klasifikasi binary berbasis graph heterogen (`user`, `pc`, `url`), disertai metode interpretabilitas menggunakan GraphSVX, agar hasil prediksi model dapat dipahami secara transparan oleh pengguna akhir.
 
 ### Tujuan Proyek
 - Menerapkan GraphSAGE pada data keamanan siber untuk mendeteksi insider threat.
@@ -44,22 +44,23 @@ source env/bin/activate
 ```bash
 pip install -r requirements.txt
 ```
-4. Jalankan pipeline utama
+4. Jalankan pipeline utama (default:1000 users)
 ```bash
 python main.py
 ```
-5. Jalankan pipeline utama dengan jumlah users (default: 1000)
+**Opsional**: </br>
+Jalankan pipeline utama dengan jumlah users tertentu
 ```bash
-python main.py --users 1000    # Untuk 1000 user
-python main.py --users 1200    # Untuk 1200 user
-python main.py --users 1300    # Untuk 1300 user
-python main.py --users 1400    # Untuk 1400 user
-python main.py --users 1500    # Untuk 1500 user
-python main.py --users 1600    # Untuk 1600 user
-python main.py --users 1700    # Untuk 1700 user
-python main.py --users 1800    # Untuk 1800 user
+python main.py --users 1000    # Untuk 1000 users
+python main.py --users 1200    # Untuk 1200 users
+python main.py --users 1300    # Untuk 1300 users
+python main.py --users 1400    # Untuk 1400 users
+python main.py --users 1500    # Untuk 1500 users
+python main.py --users 1600    # Untuk 1600 users
+python main.py --users 1700    # Untuk 1700 users
+python main.py --users 1800    # Untuk 1800 users
 ```
-6. Jalankan bagian tertentu (opsional)
+Jalankan bagian tertentu (default: 1000 users)
 ```bash
 python src.train               # Melatih model
 python src.evaluate            # Evaluasi model
