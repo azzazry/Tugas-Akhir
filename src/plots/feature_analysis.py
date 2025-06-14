@@ -49,4 +49,4 @@ def _plot_feature_importance_analysis(explanations, output_dir):
     plt.savefig(save_path, dpi=300, bbox_inches='tight')
     plt.close()
 
-    print(f"[✔] Feature importance plot disimpan di {save_path}")
+    print(f"[✔] Feature importance plot")

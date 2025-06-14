@@ -105,4 +105,4 @@ def _plot_performance_dashboard(eval_results, output_dir):
     plt.savefig(save_path, dpi=300, bbox_inches='tight')
     plt.close()
 
-    print(f"[✔] Performance dashboard disimpan di {save_path}")
+    print(f"[✔] Performance dashboard")

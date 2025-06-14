@@ -57,4 +57,4 @@ def _plot_prediction_analysis(eval_results, output_dir):
     plt.savefig(save_path, dpi=300, bbox_inches='tight')
     plt.close()
 
-    print(f"[✔] Prediction analysis berhasil disimpan di {save_path}")
+    print(f"[✔] Prediction analysis")

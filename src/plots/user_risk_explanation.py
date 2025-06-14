@@ -65,4 +65,4 @@ def _plot_user_risk_explanations(explanations, output_dir, top_n=5):
     plt.savefig(save_path, dpi=300, bbox_inches='tight')
     plt.close()
 
-    print(f"[✔] Visualisasi user risk berhasil disimpan di: {save_path}")
+    print(f"[✔] Visualisasi user risk")

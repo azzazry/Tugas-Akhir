@@ -46,4 +46,4 @@ def _plot_explanation_analysis(explanations, output_dir):
     plt.savefig(save_path, dpi=300, bbox_inches='tight')
     plt.close()
 
-    print(f"[✔] Explanation analysis plot disimpan di {save_path}")
+    print(f"[✔] Explanation analysis plot")

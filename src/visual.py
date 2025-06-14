@@ -22,44 +22,36 @@ def create_research_visualizations(users=1000):
         with open(paths["explanation_path"], 'rb') as f:
             explanations = pickle.load(f)
     except FileNotFoundError as e:
-        print(f"[❌] File tidak ditemukan: {e}")
+        print(f"File tidak ditemukan: {e}")
         return
     except Exception as e:
-        print(f"[❌] Gagal load data: {e}")
+        print(f"Gagal load data: {e}")
         return
 
     print(f"Membuat visualisasi riset di: {vis_dir}\n")
 
     # 1. Training Performance Overview
-    print('[1/8] Training overview')
     _plot_training_overview(eval_results['training_info'], output_dir=paths)
 
     # 2. Model Performance Dashboard
-    print('[2/8] Performance dashboard')
     _plot_performance_dashboard(eval_results, output_dir=paths)
 
     # 3. ROC dan Precision-Recall Curves
-    print('[3/8] ROC & PR curves')
     _plot_roc_pr_curves(eval_results, output_dir=paths)
 
     # 4. Confusion Matrix
-    print('[4/8] Confusion matrix')
     _plot_detailed_confusion_matrix(eval_results, output_dir=paths)
 
     # 5. Prediction Outcome Analysis
-    print('[5/8] Prediction analysis')
     _plot_prediction_analysis(eval_results, output_dir=paths)
 
     # 6. Explanation Summary (GraphSVX)
-    print('[6/8] Explanation analysis')
     _plot_explanation_analysis(explanations, output_dir=paths)
 
     # 7. Feature Importance (GraphSVX)
-    print('[7/8] Feature importance')
     _plot_feature_importance_analysis(explanations, output_dir=paths)
 
     # 8. User Risk Classification & Top List
-    print('[8/8] User risk distribution')
     _plot_user_risk_explanations(explanations, output_dir=paths, top_n=5)
     
 if __name__ == "__main__":

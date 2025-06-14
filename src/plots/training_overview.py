@@ -44,4 +44,4 @@ def _plot_training_overview(training_info, output_dir):
     plt.savefig(save_path, dpi=300, bbox_inches='tight')
     plt.close()
 
-    print(f"[✔] Grafik training overview berhasil disimpan di {save_path}")
+    print(f"[✔] Grafik training overview")

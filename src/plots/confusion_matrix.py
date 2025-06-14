@@ -61,4 +61,4 @@ def _plot_detailed_confusion_matrix(eval_results, output_dir):
     plt.savefig(save_path, dpi=300, bbox_inches='tight', facecolor='white')
     plt.close()
 
-    print(f"[✔] Confusion matrix disimpan di {save_path}")
+    print(f"[✔] Confusion matrix")

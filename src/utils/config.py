@@ -1,16 +1,13 @@
 import os
 
 def get_paths(users):
-    # Input: dari folder data/1500_users/
     data_dir = f"data/{users}_users"
 
-    # Output: disimpan di result/1500_users/
     result_dir = f"result/{users}_users"
     data_out = os.path.join(result_dir, "data")
     logs_dir = os.path.join(result_dir, "logs")
     vis_dir = os.path.join(result_dir, "visualizations")
 
-    # Buat folder output kalau belum ada
     os.makedirs(data_out, exist_ok=True)
     os.makedirs(logs_dir, exist_ok=True)
     os.makedirs(vis_dir, exist_ok=True)

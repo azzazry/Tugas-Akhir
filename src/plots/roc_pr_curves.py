@@ -64,4 +64,4 @@ def _plot_roc_pr_curves(eval_results, output_dir):
     plt.savefig(save_path, dpi=300, bbox_inches='tight')
     plt.close()
 
-    print(f"[✔] ROC dan PR Curve berhasil disimpan di {save_path}")
+    print(f"[✔] ROC dan PR Curve")

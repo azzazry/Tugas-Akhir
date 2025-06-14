@@ -1,0 +1,21 @@
+{
+  "scenario": "insider_threat_detection",
+  "num_users": 1700,
+  "num_pcs": 4331,
+  "num_urls": 476,
+  "train_size": 1530,
+  "val_size": 170,
+  "insider_count": 2,
+  "insiders": [
+    {
+      "user_id": "MBG3183",
+      "role": "ElectricalEngineer",
+      "department": "Engineering"
+    },
+    {
+      "user_id": "CMP2946",
+      "role": "Salesman",
+      "department": "Sales"
+    }
+  ]
+}
