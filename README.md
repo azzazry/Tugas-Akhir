@@ -1,8 +1,8 @@
-# GNN Project: GraphSAGE & GraphSVX
-Proyek ini merupakan bagian dari tugas akhir sarjana pada bidang Teknologi Informasi. Implementasi ini berfokus pada pemanfaatan _Graph Neural Network_ (GNN) untuk mendeteksi anomali berbasis graf heterogen, serta memberikan penjelasan terhadap prediksi model menggunakan pendekatan GraphSVX. Inspirasi awal berasal dari repositori [https://github.com/AlexDuvalinho/GraphSVX](https://github.com/AlexDuvalinho/GraphSVX), dengan sejumlah penyesuaian untuk konteks keamanan siber.
+# Deteksi Insider Threat Menggunakan Graph Neural Network (GraphSAGE) dan Interpretasi GraphSVX
+Proyek ini merupakan bagian dari tugas akhir sarjana pada bidang Teknologi Informasi. Fokus utama riset adalah pada deteksi anomali perilaku karyawan di lingkungan korporat (_insider threat_) yang sulit dikenali dengan metode konvensional. Implementasi ini menggabungkan _Graph Neural Network_ (GNN) dan metode interpretasi berbasis GraphSVX untuk meningkatkan akurasi dan transparansi dalam proses deteksi. Inspirasi awal berasal dari repositori [GraphSVX](https://github.com/AlexDuvalinho/GraphSVX), yang kemudian dimodifikasi dan dikembangkan lebih lanjut sesuai konteks keamanan siber.
 
 ### Abstrak
-Anomali dalam sistem komputer, seperti perilaku _insider threat_, merupakan ancaman yang sulit dideteksi dengan pendekatan konvensional. _Graph Neural Network_ (GNN), khususnya GraphSAGE, menawarkan pendekatan yang efisien untuk memahami struktur relasi dalam data berbasis graf. Proyek ini mengembangkan sistem klasifikasi binary berbasis graph heterogen (`user`, `pc`, `url`), disertai metode interpretabilitas menggunakan GraphSVX, agar hasil prediksi model dapat dipahami secara transparan oleh pengguna akhir.
+Anomali dalam sistem komputer, seperti perilaku _insider threat_, merupakan ancaman serius yang kerap luput dari pengawasan karena menyamar sebagai aktivitas normal. _Graph Neural Network_ (GNN), khususnya arsitektur GraphSAGE, menawarkan pendekatan representasi relasional yang efektif untuk mengungkap pola tersembunyi dalam data berbasis graf. Dalam proyek ini, dibangun sistem klasifikasi biner pada graf heterogen yang terdiri dari node bertipe `user`, `pc`, dan `url`. Untuk menjamin kepercayaan pengguna terhadap model, diterapkan pendekatan interpretabilitas berbasis GraphSVX agar setiap prediksi dapat dijelaskan secara transparan.
 
 ### Tujuan Proyek
 - Menerapkan GraphSAGE pada data keamanan siber untuk mendeteksi insider threat.
@@ -63,15 +63,15 @@ python main.py --users 1800    # Untuk 1800 users
 ```
 Jalankan bagian tertentu (default: 1000 users)
 ```bash
-python src.train               # Melatih model
-python src.evaluate            # Evaluasi model
-python src.explain             # Penjelasan interpretasi model
-python src.visual              # Visualisasi hasil
+python -m src.train               # Melatih model
+python -m src.evaluate            # Evaluasi model
+python -m src.explain             # Penjelasan interpretasi model
+python -m src.visual              # Visualisasi hasil
 ```
 ### Output Utama
-1. `insider_threat_graphsage.pt` – File model hasil training
-2. `evaluation_results.pkl` – Ringkasan metrik evaluasi
-3. `graphsvx_explanations.pkl` – Hasil interpretasi dengan GraphSVX
+1. `insider_threat_graphsage.pt` – Model terlatih untuk prediksi insider threat.
+2. `evaluation_results.pkl` – File berisi metrik evaluasi (AUC, precision, recall, dsb).
+3. `graphsvx_explanations.pkl` – Hasil interpretasi prediksi model untuk pengguna berisiko.
 
 ### Pustaka yang Digunakan
 - PyTorch & PyTorch Geometric – Untuk implementasi GraphSAGE
