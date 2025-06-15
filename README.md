@@ -53,7 +53,7 @@ Pipeline utama dijalankan melalui file `main.py`, yang akan melaksanakan seluruh
 ```bash
 python main.py
 ```
-Secara default, pipeline akan menggunakan 1000 user pertama dari dataset.
+Secara default, pipeline akan menggunakan 1000 user dan 5 pengguna dengan skor tertinggi dari dataset.
 ### Opsi Tambahan (Opsional)
 #### 1. Menentukan jumlah pengguna (`--users`)
 ```bash
