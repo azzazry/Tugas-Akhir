@@ -63,10 +63,10 @@ python main.py --users 1800    # Untuk 1800 users
 ```
 Jalankan bagian tertentu (default: 1000 users)
 ```bash
-python -m src.train               # Melatih model
-python -m src.evaluate            # Evaluasi model
-python -m src.explain             # Penjelasan interpretasi model
-python -m src.visual              # Visualisasi hasil
+python -m core.train               # Melatih model
+python -m core.evaluate            # Evaluasi model
+python -m core.explain             # Penjelasan interpretasi model
+python -m core.visual              # Visualisasi hasil
 ```
 ### Output Utama
 1. `insider_threat_graphsage.pt` – Model terlatih untuk prediksi insider threat.
