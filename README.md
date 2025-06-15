@@ -55,17 +55,17 @@ python main.py
 ```
 Secara default, pipeline akan menggunakan 1000 user pertama dari dataset.
 ### Opsi Tambahan (Opsional)
-#### Menentukan jumlah pengguna (`--users`)
+#### 1. Menentukan jumlah pengguna (`--users`)
 ```bash
 python main.py --users 1200
 ```
 Menjalankan pipeline dengan 1200 pengguna pertama dari dataset.
-#### Menentukan jumlah top user berisiko tertinggi (`--top_n`)
+#### 2. Menentukan jumlah top user berisiko tertinggi (`--top_n`)
 ```bash
 python main.py --top_n 2
 ```
 Menampilkan interpretasi untuk 2 pengguna dengan skor risiko tertinggi. Nilai dapat berupa angka atau "all".
-#### Kombinasi argumen `--users` dan `--top_n`
+#### 3. Kombinasi argumen `--users` dan `--top_n`
 ```bash
 python main.py --users 1400 --top_n 3
 ```
