@@ -24,4 +24,4 @@ def safe_auc_score(y_true, y_probs):
     try:
         return roc_auc_score(y_true.cpu(), y_probs[:, 1].cpu())
     except ValueError:
-        return float('nan')
+        return float('0.0')

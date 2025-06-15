@@ -6,7 +6,8 @@ def _plot_confusion_matrix(eval_results, output_dir):
     vis_path = output_dir["visualization_dir"]
     os.makedirs(vis_path, exist_ok=True)
     cm = eval_results.get('confusion_matrix', None)
-
+    
+    plt.style.use('default')
     plt.figure(figsize=(6, 5))
     sns.heatmap(cm, annot=True, fmt='d', cmap='Blues',
                 xticklabels=['Normal', 'Insider'],
@@ -20,4 +21,4 @@ def _plot_confusion_matrix(eval_results, output_dir):
     plt.savefig(save_path, dpi=300)
     plt.close()
 
-    print(f"[✔] Confusion matrix disimpan di: {save_path}")
+    print(f"[✔] Confusion matrix")

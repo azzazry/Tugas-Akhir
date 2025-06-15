@@ -7,7 +7,7 @@ from src.utils.paths import get_paths
 from src.utils.helpers import get_feature_names, get_risk_classification, get_recommendation
 from src.utils.logger import log_line, clear_log_lines, flush_logs
 from src.utils.constants import EXPECTED_EDGE_TYPES, DEFAULT_THRESHOLD, GRAPHSAGE_PARAMS, GRAPHSVX_NUM_SAMPLES, MAX_BAR_LEN
-from src.utils.colours import RED, YELLOW, GREEN, RESET
+from src.utils.colours import color_bar
 
 def explain_insider_predictions(users, top_n):
     paths = get_paths(users)
@@ -103,10 +103,10 @@ def explain_insider_predictions(users, top_n):
             bar_len = int(abs(feat_importance) * MAX_BAR_LEN)
             bar = "▓" * bar_len if bar_len > 0 else "-"
             sign = "+" if feat_importance >= 0 else "-"
-            color = RED if abs(feat_importance) >= 0.5 else YELLOW if abs(feat_importance) >= 0.2 else GREEN
             contrib_str = f"{bar} {sign}{abs(feat_importance):.2f}"
-
-            log_line(f"| {feat_name:<{max_feat_len}} | {color}{contrib_str:<{max_contrib_str_len}}{RESET} |")
+            padded_contrib_str = f"{contrib_str:<{max_contrib_str_len}}"
+            colored_contrib = color_bar(padded_contrib_str, feat_importance)
+            log_line(f"| {feat_name:<{max_feat_len}} | {colored_contrib} |")
 
         log_line(line)
         log_line(f"Recommendation: {get_recommendation(prob)}")

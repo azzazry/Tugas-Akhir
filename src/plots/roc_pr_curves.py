@@ -4,7 +4,7 @@ import os
 from sklearn.metrics import roc_curve, auc, precision_recall_curve
 
 def _plot_roc_pr_curves(eval_results, output_dir):
-    # Support dict dari get_paths()
+    
     if isinstance(output_dir, dict):
         output_dir = output_dir["visualization_dir"]
     
@@ -35,7 +35,7 @@ def _plot_roc_pr_curves(eval_results, output_dir):
         ax1.set_ylim([0.0, 1.05])
         ax1.set_xlabel('False Positive Rate')
         ax1.set_ylabel('True Positive Rate')
-        ax1.set_title('ROC Curve', fontsize=14, fontweight='bold')
+        ax1.set_title('ROC Curve', fontsize=14)
         ax1.legend(loc="lower right")
         ax1.grid(True, alpha=0.3)
 
@@ -48,7 +48,7 @@ def _plot_roc_pr_curves(eval_results, output_dir):
         ax2.set_ylim([0.0, 1.05])
         ax2.set_xlabel('Recall')
         ax2.set_ylabel('Precision')
-        ax2.set_title('Precision-Recall Curve', fontsize=14, fontweight='bold')
+        ax2.set_title('Precision-Recall Curve', fontsize=14)
         ax2.legend(loc="lower left")
         ax2.grid(True, alpha=0.3)
 
@@ -56,7 +56,7 @@ def _plot_roc_pr_curves(eval_results, output_dir):
         for ax, title in zip([ax1, ax2], ['ROC Curve', 'Precision-Recall Curve']):
             ax.text(0.5, 0.5, 'Curve not available\n(insufficient data)', 
                     ha='center', va='center', transform=ax.transAxes, fontsize=12)
-            ax.set_title(title, fontsize=14, fontweight='bold')
+            ax.set_title(title, fontsize=14)
             ax.axis('off')
 
     plt.tight_layout()

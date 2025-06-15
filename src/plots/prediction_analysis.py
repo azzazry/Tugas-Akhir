@@ -3,7 +3,7 @@ import numpy as np
 import os
 
 def _plot_prediction_analysis(eval_results, output_dir):
-    # Handle kalau output_dir berupa dict (dari get_paths)
+    
     if isinstance(output_dir, dict):
         output_dir = output_dir["visualization_dir"]
     

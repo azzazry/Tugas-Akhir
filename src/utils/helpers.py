@@ -24,6 +24,11 @@ def get_recommendation(prob):
         return "Perketat pengawasan dan audit aktivitas pengguna."
     else:
         return "Monitor secara rutin dan lakukan edukasi keamanan."
-    
-def format_eval_line(name, value, unit=""):
-    return f"{name:<25}: {value:.4f} {unit}"
+
+def format_eval_line(label, value, auto_percent=True):
+    if auto_percent and isinstance(value, float):
+        if 0.0 < value <= 1.0 and "threshold" not in label.lower():
+            return f"- {label}: {value * 100:.2f}%"
+        else:
+            return f"- {label}: {value:.4f}"
+    return f"- {label}: {value}"

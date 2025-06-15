@@ -27,7 +27,6 @@ def create_research_visualizations(users, top_n):
     except Exception as e:
         print(f"Gagal load data: {e}")
         return
-    print("")
 
     _plot_training_overview(eval_results['training_info'], output_dir=paths)
     _plot_performance_dashboard(eval_results, output_dir=paths)

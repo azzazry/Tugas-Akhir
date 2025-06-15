@@ -49,14 +49,12 @@ def evaluate_insider_threat_model(users):
         val_f1 = f1_score(val_labels.cpu(), val_pred.cpu(), zero_division=0)
         val_auc = safe_auc_score(val_labels, val_probs)
 
-    # Logging
     log_line(format_eval_line("Best Threshold", best_thresh))
     log_line(format_eval_line("AUC", val_auc))
     log_line(format_eval_line("Validation Accuracy", val_acc))
     log_line(format_eval_line("Validation F1-Score", val_f1))
     log_line(format_eval_line("F1 Score", best_f1))
 
-    # Classification Report
     class_report = classification_report(
         val_labels.cpu(), val_pred.cpu(),
         labels=CLASS_LABELS,

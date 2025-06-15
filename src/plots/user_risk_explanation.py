@@ -41,12 +41,12 @@ def _plot_user_risk_explanations(explanations, output_dir, top_n):
     counts = [risk_counts.get(k, 0) for k in categories]
     colors = ['green', 'orange', 'red']
     bars = ax1.bar(categories, counts, color=colors, alpha=0.7)
-    ax1.set_title('Distribusi Risiko Pengguna', fontsize=14, fontweight='bold')
+    ax1.set_title('Distribusi Risiko Pengguna', fontsize=14)
     ax1.set_ylabel('Jumlah Pengguna')
     for bar, count in zip(bars, counts):
         if count > 0:
             ax1.text(bar.get_x() + bar.get_width()/2, bar.get_height(),
-                     str(count), ha='center', va='bottom', fontweight='bold')
+                     str(count), ha='center', va='bottom')
 
     # Chart 2 - Top-N Users
     bars2 = ax2.barh(range(len(top_labels)), top_values, color='crimson', alpha=0.8)
@@ -55,7 +55,7 @@ def _plot_user_risk_explanations(explanations, output_dir, top_n):
     ax2.invert_yaxis()
     ax2.set_xlabel('Probabilitas Insider')
     ax2.set_xlim(0, 1)
-    ax2.set_title(f'Top {top_n} Pengguna Paling Mencurigakan', fontsize=14, fontweight='bold')
+    ax2.set_title(f'Top {top_n} Pengguna Paling Mencurigakan', fontsize=14)
     for i, bar in enumerate(bars2):
         prob = bar.get_width()
         ax2.text(prob + 0.01, bar.get_y() + bar.get_height()/2,
