@@ -1,9 +1,9 @@
 import torch
 import torch.nn.functional as F
 import pickle
-from models.graphsage import GraphSAGE
-from models.graphsvx import GraphSVXExplainer
-from src.utils.config import get_paths
+from src.models.graphsage import GraphSAGE
+from src.models.graphsvx import GraphSVXExplainer
+from src.utils.paths import get_paths
 
 RED, YELLOW, GREEN, RESET = "\033[91m", "\033[93m", "\033[92m", "\033[0m"
 log_lines = []
@@ -39,7 +39,7 @@ def get_recommendation(prob):
     else:
         return "Monitor secara rutin dan lakukan edukasi keamanan."
 
-def explain_insider_predictions(users='1000'):
+def explain_insider_predictions(users):
     paths = get_paths(users)
 
     # Load data dan model

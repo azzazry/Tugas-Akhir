@@ -1,10 +1,10 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import os
-from src.explain import get_feature_names
+from core.explain import get_feature_names
 
 def _plot_feature_importance_analysis(explanations, output_dir):
-    # Jika output_dir adalah dict (hasil dari get_paths), ambil direktori visualisasi
+    
     if isinstance(output_dir, dict):
         output_dir = output_dir["visualization_dir"]
 

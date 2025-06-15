@@ -1,6 +1,6 @@
 import pickle
 import os
-from src.utils.config import get_paths
+from src.utils.paths import get_paths
 
 from src.plots.training_overview import _plot_training_overview
 from src.plots.performance_dashboard import _plot_performance_dashboard
@@ -11,7 +11,7 @@ from src.plots.explanation_analysis import _plot_explanation_analysis
 from src.plots.feature_analysis import _plot_feature_importance_analysis
 from src.plots.user_risk_explanation import _plot_user_risk_explanations
 
-def create_research_visualizations(users=1000):
+def create_research_visualizations(users):
     paths = get_paths(users)
     vis_dir = paths["visualization_dir"]
     os.makedirs(vis_dir, exist_ok=True)
@@ -27,6 +27,7 @@ def create_research_visualizations(users=1000):
     except Exception as e:
         print(f"Gagal load data: {e}")
         return
+    print("")
 
     # 1. Training Performance Overview
     _plot_training_overview(eval_results['training_info'], output_dir=paths)

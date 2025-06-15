@@ -2,10 +2,10 @@ import os
 import traceback
 import argparse
 
-from src.train import train_insider_threat_model
-from src.evaluate import evaluate_insider_threat_model
-from src.explain import explain_insider_predictions
-from src.visual import create_research_visualizations
+from core.train import train_insider_threat_model
+from core.evaluate import evaluate_insider_threat_model
+from core.explain import explain_insider_predictions
+from core.visual import create_research_visualizations
 
 def create_directories(users):
     os.makedirs(f'result/{users}_users/visualizations', exist_ok=True)

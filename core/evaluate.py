@@ -3,10 +3,10 @@ from sklearn.metrics import accuracy_score, f1_score, classification_report, con
 import pickle
 import os
 import numpy as np
-from models.graphsage import GraphSAGE
-from src.utils.config import get_paths
+from src.models.graphsage import GraphSAGE
+from src.utils.paths import get_paths
 
-def evaluate_insider_threat_model(users='1000'):
+def evaluate_insider_threat_model(users):
     paths = get_paths(users)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     log_lines = []

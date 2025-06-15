@@ -3,10 +3,10 @@ from torch.optim import Adam
 from torch.nn import CrossEntropyLoss
 from sklearn.metrics import accuracy_score
 import pickle
-from models.graphsage import GraphSAGE
-from src.utils.config import get_paths
+from src.models.graphsage import GraphSAGE
+from src.utils.paths import get_paths
 
-def train_insider_threat_model(users='1000'):
+def train_insider_threat_model(users):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     paths = get_paths(users)
 
