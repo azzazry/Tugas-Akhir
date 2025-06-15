@@ -124,4 +124,4 @@ def evaluate_insider_threat_model(users='1000'):
     return eval_results
 
 if __name__ == "__main__":
-    evaluate_insider_threat_model()
+    evaluate_insider_threat_model(users=1000)

@@ -94,4 +94,4 @@ def train_insider_threat_model(users='1000'):
     return model, training_info
 
 if __name__ == '__main__':
-    train_insider_threat_model('1000')  # Default
+    train_insider_threat_model(users=1000)

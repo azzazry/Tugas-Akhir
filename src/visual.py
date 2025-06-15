@@ -28,8 +28,6 @@ def create_research_visualizations(users=1000):
         print(f"Gagal load data: {e}")
         return
 
-    print(f"Membuat visualisasi riset di: {vis_dir}\n")
-
     # 1. Training Performance Overview
     _plot_training_overview(eval_results['training_info'], output_dir=paths)
 

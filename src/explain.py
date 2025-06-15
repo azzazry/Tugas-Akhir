@@ -169,4 +169,4 @@ def explain_insider_predictions(users='1000'):
             f.write(clean + "\n")
 
 if __name__ == "__main__":
-    explain_insider_predictions()
+    explain_insider_predictions(users=1000)
