@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import os
-from core.explain import get_feature_names
+from src.utils.helpers import get_feature_names
 
 def _plot_feature_importance_analysis(explanations, output_dir):
     

@@ -6,11 +6,7 @@ numpy
 torch
 torch-geometric
 scikit-learn
-# imbalanced-learn
 
 # Data visualization
 matplotlib
 seaborn
-
-# Jupyter notebook
-# jupyter

@@ -3,10 +3,15 @@ from torch.optim import Adam
 from torch.nn import CrossEntropyLoss
 from sklearn.metrics import accuracy_score
 import pickle
+
 from src.models.graphsage import GraphSAGE
 from src.utils.paths import get_paths
+from src.utils.metrics import compute_class_weights
+from src.utils.constants import CLASS_WEIGHT_SCALING, EPOCHS, WEIGHT_DECAY, GRAPHSAGE_PARAMS, LR
+from src.utils.logger import log_line, clear_log_lines, flush_logs
 
 def train_insider_threat_model(users):
+    clear_log_lines()
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     paths = get_paths(users)
 
@@ -18,33 +23,25 @@ def train_insider_threat_model(users):
             'url': data['url'].x
         }
 
-    model = GraphSAGE(hidden_dim=64, out_dim=2, num_layers=2).to(device)
-    optimizer = Adam(model.parameters(), lr=0.01, weight_decay=5e-4)
+    model = GraphSAGE(**GRAPHSAGE_PARAMS).to(device)
+    optimizer = Adam(model.parameters(), lr=LR, weight_decay=WEIGHT_DECAY)
 
     labels = data['user'].y.to(device)
-    classes, counts = torch.unique(labels, return_counts=True)
-    class_weights = torch.zeros(2).to(device)
-    for cls, cnt in zip(classes, counts):
-        class_weights[cls] = 1.0 / cnt.float()
-    class_weights = class_weights / class_weights.sum() * 2
+    class_weights = compute_class_weights(labels, num_classes=2, scaling=CLASS_WEIGHT_SCALING)
     criterion = CrossEntropyLoss(weight=class_weights)
 
     model.train()
     train_losses = []
     train_accs = []
-    epochs = 100
+    epochs = EPOCHS
     edge_index_dict = data.edge_index_dict
 
     for key in data.x_dict:
         data.x_dict[key] = data.x_dict[key].to(device)
 
-    log_lines = []
-    log_lines.append("+--------+----------+----------+")
-    log_lines.append("| Epoch  |  Loss    | Accuracy |")
-    log_lines.append("+--------+----------+----------+")
-    print(log_lines[-3])
-    print(log_lines[-2])
-    print(log_lines[-1])
+    log_line("+--------+----------+----------+")
+    log_line("| Epoch  |  Loss    | Accuracy |")
+    log_line("+--------+----------+----------+")
 
     for epoch in range(epochs):
         optimizer.zero_grad()
@@ -61,12 +58,11 @@ def train_insider_threat_model(users):
         train_accs.append(acc)
 
         if epoch % 10 == 0:
-            log_line = f"|  {epoch:03d}   |  {loss.item():<8.4f}|  {acc:<8.4f}|"
-            print(log_line)
-            log_lines.append(log_line)
+            log_line(f"|  {epoch:03d}   |  {loss.item():<8.4f}|  {acc:<8.4f}|")
 
-    log_lines.append("+--------+----------+----------+")
-    print(log_lines[-1])
+    log_line("+--------+----------+----------+")
+    log_line(f"Final loss: {train_losses[-1]:.4f}, Final acc: {train_accs[-1]:.4f}")
+    log_line(f"Class weights used: {class_weights.cpu().tolist()}")
 
     # Save model & training info
     torch.save(model.state_dict(), paths["model_path"])
@@ -81,17 +77,14 @@ def train_insider_threat_model(users):
     with open(paths["training_info_path"], 'wb') as f:
         pickle.dump(training_info, f)
 
-    log_lines.append(f"Final loss: {train_losses[-1]:.4f}, Final acc: {train_accs[-1]:.4f}")
-    log_lines.append(f"Class weights used: {training_info['class_weights']}")
-
-    with open(paths["log_file"], "w") as f:
-        for line in log_lines:
-            f.write(line + "\n")
-
-    print(log_lines[-2])
-    print(log_lines[-1])
+    flush_logs(paths['eval_log_path'])
 
     return model, training_info
 
-if __name__ == '__main__':
-    train_insider_threat_model(users=1000)
+if __name__ == "__main__":
+    try:
+        from src.utils.argparse import get_arguments
+        args = get_arguments()
+        train_insider_threat_model(users=args.users)
+    except ImportError:
+        train_insider_threat_model(users='1000')

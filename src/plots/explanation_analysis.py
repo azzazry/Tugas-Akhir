@@ -3,7 +3,7 @@ import numpy as np
 import os
 
 def _plot_explanation_analysis(explanations, output_dir):
-    # Handle jika output_dir yang dikirim adalah dict dari get_paths()
+
     if isinstance(output_dir, dict):
         output_dir = output_dir["visualization_dir"]
     

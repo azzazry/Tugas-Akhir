@@ -4,47 +4,18 @@ import pickle
 from src.models.graphsage import GraphSAGE
 from src.models.graphsvx import GraphSVXExplainer
 from src.utils.paths import get_paths
+from src.utils.helpers import get_feature_names, get_risk_classification, get_recommendation
+from src.utils.logger import log_line, clear_log_lines, flush_logs
+from src.utils.constants import EXPECTED_EDGE_TYPES, DEFAULT_THRESHOLD, GRAPHSAGE_PARAMS, GRAPHSVX_NUM_SAMPLES, MAX_BAR_LEN
+from src.utils.colours import RED, YELLOW, GREEN, RESET
 
-RED, YELLOW, GREEN, RESET = "\033[91m", "\033[93m", "\033[92m", "\033[0m"
-log_lines = []
-
-def log_line(line):
-    print(line, flush=True)
-    log_lines.append(line)
-
-def get_feature_names():
-    return [
-        'Total Logon Events', 'Total File Events', 'Total Device Events', 'Total HTTP Events',
-        'Logon Count', 'After Hours Logon', 'Weekend Logon',
-        'File Open Count', 'File Write Count', 'File Copy Count', 'File Delete Count',
-        'Device Connect Count', 'Device Disconnect Count',
-        'Visit Frequency', 'Unique Visit Days',
-        'After Hours Browsing', 'Cloud Service Visits', 'Job Site Visits'
-    ]
-
-def get_risk_classification(prob):
-    if prob > 0.7:
-        return "Resiko Tinggi"
-    elif prob > 0.4:
-        return "Resiko Sedang"
-    else:
-        return "Resiko Rendah (Top Candidate)"
-
-def get_recommendation(prob):
-    status = get_risk_classification(prob)
-    if status == "Resiko Tinggi":
-        return "Segera lakukan investigasi mendalam dan monitoring aktif."
-    elif status == "Resiko Sedang":
-        return "Perketat pengawasan dan audit aktivitas pengguna."
-    else:
-        return "Monitor secara rutin dan lakukan edukasi keamanan."
-
-def explain_insider_predictions(users):
+def explain_insider_predictions(users, top_n):
     paths = get_paths(users)
+    clear_log_lines()
 
     # Load data dan model
     data = torch.load(paths['data_graph_path'], weights_only=False)
-    model = GraphSAGE(hidden_dim=64, out_dim=2, num_layers=2)
+    model = GraphSAGE(**GRAPHSAGE_PARAMS)
     model.load_state_dict(torch.load(paths['model_path']))
     model.eval()
 
@@ -54,16 +25,14 @@ def explain_insider_predictions(users):
         'url': data['url'].x
     })
 
-    expected_edges = [('user', 'uses', 'pc'), ('user', 'visits', 'url'), ('user', 'interacts', 'user')]
-    edge_index_dict = {etype: data.edge_index_dict[etype] for etype in expected_edges if etype in data.edge_index_dict}
+    edge_index_dict = {etype: data.edge_index_dict[etype] for etype in EXPECTED_EDGE_TYPES if etype in data.edge_index_dict}
 
-    # Ambil threshold
     try:
         with open(paths['evaluation_path'], 'rb') as f:
             eval_results = pickle.load(f)
-            best_threshold = eval_results.get('best_threshold', 0.15)
+            best_threshold = eval_results.get('best_threshold', DEFAULT_THRESHOLD)
     except FileNotFoundError:
-        best_threshold = 0.15
+        best_threshold = DEFAULT_THRESHOLD
 
     # Hitung probabilitas
     with torch.no_grad():
@@ -80,9 +49,13 @@ def explain_insider_predictions(users):
         insider_probs = probs[insider_candidates, 1]
 
     sorted_indices = torch.argsort(insider_probs, descending=True)
-    explain_indices = insider_candidates[sorted_indices[:5]]
-    explainer = GraphSVXExplainer(model=model, node_type='user', num_samples=30)
+    explain_indices = (
+        insider_candidates[sorted_indices]
+        if str(top_n).lower() == "all"
+        else insider_candidates[sorted_indices[:int(top_n)]]
+    )
 
+    explainer = GraphSVXExplainer(model=model, node_type='user', num_samples=GRAPHSVX_NUM_SAMPLES)
     feature_names = get_feature_names()
 
     with open(paths['user_metadata_path'], 'rb') as f:
@@ -107,10 +80,11 @@ def explain_insider_predictions(users):
         top_indices = importance.argsort()[-5:][::-1]
 
         printed = set()
-        top_feat_names = [(feature_names[i] if i < len(feature_names) else f"feature_{i}") for i in top_indices]
+        top_feat_names = [
+            (feature_names[i] if i < len(feature_names) else f"feature_{i}") for i in top_indices
+        ]
         max_feat_len = max(len(name) for name in top_feat_names)
-        max_bar_len = 20
-        max_contrib_str_len = max_bar_len + len(" +0.00")
+        max_contrib_str_len = MAX_BAR_LEN + len(" +0.00")
 
         line = f"+{'-' * (max_feat_len + 2)}+{'-' * (max_contrib_str_len + 2)}+"
         header = f"| {'Feature':<{max_feat_len}} | {'Contribution':<{max_contrib_str_len}} |"
@@ -126,7 +100,7 @@ def explain_insider_predictions(users):
             feat_importance = importance[feat_idx]
             printed.add(feat_name)
 
-            bar_len = int(abs(feat_importance) * max_bar_len)
+            bar_len = int(abs(feat_importance) * MAX_BAR_LEN)
             bar = "▓" * bar_len if bar_len > 0 else "-"
             sign = "+" if feat_importance >= 0 else "-"
             color = RED if abs(feat_importance) >= 0.5 else YELLOW if abs(feat_importance) >= 0.2 else GREEN
@@ -151,7 +125,6 @@ def explain_insider_predictions(users):
             ]
         }
 
-    # Simpan hasil explanations
     with open(paths['explanation_path'], 'wb') as f:
         pickle.dump(explanations, f)
 
@@ -163,10 +136,12 @@ def explain_insider_predictions(users):
     log_line(f"- Max insider probability: {probs[:, 1].max():.3f}")
     log_line(f"- Average insider probability: {probs[:, 1].mean():.3f}")
 
-    with open(paths['explanation_log_path'], "w", encoding="utf-8") as f:
-        for line in log_lines:
-            clean = line.replace(RED, "").replace(YELLOW, "").replace(GREEN, "").replace(RESET, "")
-            f.write(clean + "\n")
+    flush_logs(paths['explanation_log_path'])
 
 if __name__ == "__main__":
-    explain_insider_predictions(users=1000)
+    try:
+        from src.utils.argparse import get_arguments
+        args = get_arguments()
+        explain_insider_predictions(users=args.users, top_n=args.top_n)
+    except ImportError:
+        explain_insider_predictions(users='1000', top_n='5')
