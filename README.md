@@ -59,7 +59,7 @@ Secara default, pipeline akan menggunakan 1000 user dan 5 pengguna dengan skor t
 ```bash
 python main.py --users 1200
 ```
-Menjalankan pipeline dengan 1200 pengguna pertama dari dataset.
+Menjalankan pipeline dengan 1200 pengguna pertama dari dataset. Rentang jumlah pengguna dari 1000, 1200, .., 1800.
 #### 2. Menentukan jumlah top user berisiko tertinggi (`--top_n`)
 ```bash
 python main.py --top_n 2
