@@ -13,7 +13,6 @@ def explain_insider_predictions(users, top_n):
     paths = get_paths(users)
     clear_log_lines()
 
-    # Load data dan model
     data = torch.load(paths['data_graph_path'], weights_only=False)
     model = GraphSAGE(**GRAPHSAGE_PARAMS)
     model.load_state_dict(torch.load(paths['model_path']))
@@ -34,7 +33,6 @@ def explain_insider_predictions(users, top_n):
     except FileNotFoundError:
         best_threshold = DEFAULT_THRESHOLD
 
-    # Hitung probabilitas
     with torch.no_grad():
         out = model(x_dict, edge_index_dict)
         probs = F.softmax(out, dim=1)
@@ -128,14 +126,12 @@ def explain_insider_predictions(users, top_n):
     with open(paths['explanation_path'], 'wb') as f:
         pickle.dump(explanations, f)
 
-    # Summary log
     log_line(f"\nKesimpulan:")
     log_line(f"- Total users analyzed: {len(x_dict['user'])}")
     log_line(f"- Using threshold: {best_threshold:.2f}")
     log_line(f"- Users meeting threshold (>{best_threshold}): {len(insider_candidates)}")
     log_line(f"- Max insider probability: {probs[:, 1].max():.3f}")
     log_line(f"- Average insider probability: {probs[:, 1].mean():.3f}")
-
     flush_logs(paths['explanation_log_path'])
 
 if __name__ == "__main__":

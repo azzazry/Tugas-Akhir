@@ -1,9 +1,8 @@
 import torch
+import pickle
 from torch.optim import Adam
 from torch.nn import CrossEntropyLoss
 from sklearn.metrics import accuracy_score
-import pickle
-
 from src.models.graphsage import GraphSAGE
 from src.utils.paths import get_paths
 from src.utils.metrics import compute_class_weights
@@ -64,7 +63,6 @@ def train_insider_threat_model(users):
     log_line(f"Final loss: {train_losses[-1]:.4f}, Final acc: {train_accs[-1]:.4f}")
     log_line(f"Class weights used: {class_weights.cpu().tolist()}")
 
-    # Save model & training info
     torch.save(model.state_dict(), paths["model_path"])
     training_info = {
         'train_losses': train_losses,

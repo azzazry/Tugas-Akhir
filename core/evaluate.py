@@ -64,7 +64,6 @@ def evaluate_insider_threat_model(users):
     log_line("\n[Classification Report]")
     log_line(class_report)
 
-    # Load user metadata
     try:
         with open(paths['user_metadata_path'], 'rb') as f:
             user_meta = pickle.load(f)
@@ -72,7 +71,6 @@ def evaluate_insider_threat_model(users):
         log_line(f"[Warning] Gagal load user metadata: {e}")
         user_meta = None
 
-    # Load training info
     training_info = {}
     if os.path.exists(paths['training_info_path']):
         with open(paths['training_info_path'], 'rb') as f:

@@ -1,6 +1,5 @@
-import os
-
 def get_paths(users):
+    import os
     data_dir = f"data/{users}_users"
 
     result_dir = f"result/{users}_users"

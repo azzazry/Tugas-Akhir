@@ -1,11 +1,23 @@
 def get_feature_names():
     return [
-        'Total Logon Events', 'Total File Events', 'Total Device Events', 'Total HTTP Events',
-        'Logon Count', 'After Hours Logon', 'Weekend Logon',
-        'File Open Count', 'File Write Count', 'File Copy Count', 'File Delete Count',
-        'Device Connect Count', 'Device Disconnect Count',
-        'Visit Frequency', 'Unique Visit Days',
-        'After Hours Browsing', 'Cloud Service Visits', 'Job Site Visits'
+        'Total Logon Events',
+        'Total File Events',
+        'Total Device Events',
+        'Total HTTP Events',
+        'Logon Count',
+        'After Hours Logon',
+        'Weekend Logon',
+        'File Open Count',
+        'File Write Count',
+        'File Copy Count',
+        'File Delete Count',
+        'Device Connect Count',
+        'Device Disconnect Count',
+        'Visit Frequency',
+        'Unique Visit Days',
+        'After Hours Browsing',
+        'Cloud Service Visits',
+        'Job Site Visits'
     ]
 
 def get_risk_classification(prob):

@@ -1,4 +1,3 @@
-import re
 log_lines = []
 
 def get_last_log(n=1):
@@ -8,6 +7,7 @@ def clear_log_lines():
     log_lines.clear()
     
 def strip_ansi(text):
+    import re
     ansi_escape = re.compile(r'\x1B[@-_][0-?]*[ -/]*[@-~]')
     return ansi_escape.sub('', text)
 
