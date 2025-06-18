@@ -75,7 +75,7 @@ def train_insider_threat_model(users):
     with open(paths["training_info_path"], 'wb') as f:
         pickle.dump(training_info, f)
 
-    flush_logs(paths['eval_log_path'])
+    flush_logs(paths['training_log_path'])
 
     return model, training_info
 

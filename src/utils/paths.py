@@ -25,7 +25,7 @@ def get_paths(users):
         "explanation_path": os.path.join(data_out, "graphsvx_explanations.pkl"),
 
         # Log & vis
-        "log_file": os.path.join(logs_dir, "training_log.log"),
+        "training_log_path": os.path.join(logs_dir, "training_log.log"),
         "eval_log_path": os.path.join(logs_dir, "evaluation_log.log"),
         "explanation_log_path": os.path.join(logs_dir, "explanation_log.log"),
         "visualization_dir": vis_dir
