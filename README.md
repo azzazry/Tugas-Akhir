@@ -95,6 +95,6 @@ python -m core.visual          # Visualisasi metrik dan interpretasi
 
 ### Penulis
 
-Tugas Akhir oleh [Aaz Zazri Nugraha](https://github.com/azzazry)
-Universitas Jenderal Achmad Yani Yogyakarta (2025)
+Tugas Akhir oleh [Aaz Zazri Nugraha](https://github.com/azzazry) </br>
+Universitas Jenderal Achmad Yani Yogyakarta (2025) </br>
 *Email: [azzazry120@email.com](mailto:azzazry120@email.com)*
