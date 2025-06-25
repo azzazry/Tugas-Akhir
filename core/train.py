@@ -1,5 +1,6 @@
 import torch
 import pickle
+import time
 from torch.optim import Adam
 from torch.nn import CrossEntropyLoss
 from sklearn.metrics import accuracy_score
@@ -42,6 +43,8 @@ def train_insider_threat_model(users):
     log_line("| Epoch  |  Loss    | Accuracy |")
     log_line("+--------+----------+----------+")
 
+    start_time = time.time()
+
     for epoch in range(epochs):
         optimizer.zero_grad()
         out = model(data.x_dict, edge_index_dict)
@@ -59,9 +62,13 @@ def train_insider_threat_model(users):
         if epoch % 10 == 0:
             log_line(f"|  {epoch:03d}   |  {loss.item():<8.4f}|  {acc:<8.4f}|")
 
+    end_time = time.time()
+    training_duration = end_time - start_time
+
     log_line("+--------+----------+----------+")
     log_line(f"Final loss: {train_losses[-1]:.4f}, Final acc: {train_accs[-1]:.4f}")
     log_line(f"Class weights used: {class_weights.cpu().tolist()}")
+    log_line(f"Total training time: {training_duration:.2f} seconds")
 
     torch.save(model.state_dict(), paths["model_path"])
     training_info = {
@@ -71,6 +78,7 @@ def train_insider_threat_model(users):
         'final_loss': train_losses[-1],
         'final_acc': train_accs[-1],
         'class_weights': class_weights.cpu().tolist(),
+        'training_time_sec': training_duration
     }
     with open(paths["training_info_path"], 'wb') as f:
         pickle.dump(training_info, f)
